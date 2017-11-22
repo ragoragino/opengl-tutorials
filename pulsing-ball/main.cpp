@@ -49,7 +49,7 @@ int main()
 	// Setting up directories for saving snapshots
 	const char dir[] = "visuals\\snapshot_";
 	const size_t N = sizeof(dir);
-	const char end[] = ".tiff";
+	const char end[] = ".png";
 	const size_t N_add = N + sizeof(end) + 4; // 4 bytes for time_counter signifier appended
 	char cur_dir[N_add];
 
@@ -191,11 +191,11 @@ int main()
 			memcpy(cur_dir, dir, N);
 
 			FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, width, height, 3 * width, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
-			FreeImage_Save(FIF_TIFF, image, strcat(strcat(cur_dir, char_num), end), TIFF_NONE);
+			FreeImage_Save(FIF_PNG, image, strcat(strcat(cur_dir, char_num), end), PNG_DEFAULT);
 
 			FreeImage_Unload(image);
 
-			time_counter += 2; // Take snapshots every two seconds
+			time_counter += 1; // Take snapshots every time_counter seconds
 		}
 
 		glfwSwapBuffers(window);
