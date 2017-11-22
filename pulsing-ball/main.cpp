@@ -24,7 +24,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
-const int LEN = 50; // INPUT : Number of bottom triangles
+const int LEN = 30; // INPUT : Number of bottom triangles
 
 int main()
 {
@@ -49,7 +49,7 @@ int main()
 	// Setting up directories for saving snapshots
 	const char dir[] = "visuals\\snapshot_";
 	const size_t N = sizeof(dir);
-	const char end[] = ".bmp";
+	const char end[] = ".tiff";
 	const size_t N_add = N + sizeof(end) + 4; // 4 bytes for time_counter signifier appended
 	char cur_dir[N_add];
 
@@ -191,7 +191,7 @@ int main()
 			memcpy(cur_dir, dir, N);
 
 			FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, width, height, 3 * width, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
-			FreeImage_Save(FIF_BMP, image, strcat(strcat(cur_dir, char_num), end), 0);
+			FreeImage_Save(FIF_TIFF, image, strcat(strcat(cur_dir, char_num), end), TIFF_NONE);
 
 			FreeImage_Unload(image);
 

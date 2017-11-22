@@ -1,0 +1,1 @@
+A model of two rotating spires expanding into a sphere and then stretching back into the original spire.
