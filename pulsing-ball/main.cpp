@@ -1,23 +1,23 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <gtx/norm.hpp>
 #define _USE_MATH_DEFINES 
 #include "math.h"
+#include "string.h"
 #include "Shader.h"
 #include "spire.h"
+#include "D:\\Materials\\Programming\\C++\\Libraries\\FreeImage\\Dist\\x64\\FreeImage.h"
 
-#include <iostream>
-
-float spire_height;
 unsigned int ID; // ID of the shader
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, spire_height); // current camera position
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0); // current camera position
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // current camera target
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // current camera up vector
 float lastX = 400, lastY = 300; // initial positions of mouse
 bool firstMouse = true; // initial mouse indicator
 float yaw = -90.0f, pitch = 0.0f; // initial yaw and pitch values
 float fov = 90.0f; // initial fov
-unsigned int width = 1600, height = 1200; // window parameters
+unsigned int width = 1200, height = 800; // window parameters
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -28,6 +28,32 @@ const int LEN = 50; // INPUT : Number of bottom triangles
 
 int main()
 {
+	// Create the spire object and initialize variables
+	int n_triangles = 0; // number of triangles on one side of the spire
+	for (int i = 2 * LEN - 1; i >= 1; i -= 2)
+	{
+		n_triangles += i;
+	}
+	const float size = 10.0; // size of all sides of the spire
+	float* spire_obj = spire(size, LEN, n_triangles);
+	const int side = n_triangles * 3 * 3; // number of floats representing one sides
+	const float spire_height = pow(pow(size, 2.0) / 2.0, 0.5); // hei9ght of the spire
+	const int steps = 1000; // number of expanding/stretching steps
+	int step = steps;
+	float ratio, rotation_param; // ratio for expansion/stretching and parameter for rotation
+	int time_counter = 0; // counter used to take snapshots
+	BYTE* pixels = new BYTE[3 * width * height]; // Create buffer to hold pixel values for snapshots
+	cameraPos = glm::vec3(0.0f, 0.0f, spire_height * 2); // Initialize camera position
+	const float theta = M_PI / 2; // angle for rotation
+
+	// Setting up directories for saving snapshots
+	const char dir[] = "visuals\\snapshot_";
+	const size_t N = sizeof(dir);
+	const char end[] = ".bmp";
+	const size_t N_add = N + sizeof(end) + 4; // 4 bytes for time_counter signifier appended
+	char cur_dir[N_add];
+
+	// Initialize GLFW 
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -40,6 +66,7 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
+	glfwSetWindowPos(window, 100, 100);
 
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -51,42 +78,26 @@ int main()
 	}
 
 	Shader shader = Shader("D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\pulsing-ball\\data\\vshader.vp",
-		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\pulsing-ball\\data\\fshader.fp");
+		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\pulsing-ball\\data\\fshader.fp"); // Paths to shaders
 	ID = shader.ID;
-
-
-	int n_triangles = 0; // number of triangles on one side of the spire
-	for (int i = 2 * LEN - 1; i >= 1; i -= 2)
-	{
-		n_triangles += i;
-	}
-	const float size = 10.0;
-	float * spire_obj2 = spire(size, LEN, n_triangles);
-	const int side = n_triangles * 3 * 3;
-	const float spire_height = pow(pow(size, 2.0) / 2.0, 0.5);
-	const int steps = 1000;
-	int step = steps;
-	float dist, ratio, rotation_param;
-
+	
 	unsigned int VAO, VBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO); 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * side, spire_obj2, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * side, spire_obj, GL_STREAM_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	shader.use();
 
-	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // set polygon line mode drawing
 
-	const float theta = M_PI / 2;
-
-	while (!glfwWindowShouldClose(window)) // render loop
+	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
 
@@ -97,11 +108,12 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 		glBindVertexArray(VAO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * side, spire_obj2, GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * side, spire_obj, GL_STREAM_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		rotation_param = glfwGetTime() / (2 * M_PI);
+		// each 2 * pi seconds the object makes one rotation
+		rotation_param = 2 * glfwGetTime() / theta; 
 				
 		for (int i = 0; i != 4; ++i)
 		{
@@ -128,16 +140,17 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, n_triangles * 3);
 		}
 
-		// Changing the data buffer 
+		// Change the data buffer by expanding or shrinking the object
 		if (step > 0)
 		{
 			for (int i = 0; i != n_triangles * 3 * 3; i += 3)
 			{
-				dist = pow(spire_obj2[i] * spire_obj2[i] + spire_obj2[i + 1] * spire_obj2[i + 1] + spire_obj2[i + 2] * spire_obj2[i + 2], 0.5);
-				ratio =  spire_height / dist;
-				spire_obj2[i] += (ratio * spire_obj2[i] - spire_obj2[i]) / step;
-				spire_obj2[i + 1] += (ratio * spire_obj2[i + 1] - spire_obj2[i + 1]) / step;
-				spire_obj2[i + 2] += (ratio * spire_obj2[i + 2] - spire_obj2[i + 2]) / step;
+				ratio = spire_height / pow(spire_obj[i] * spire_obj[i] + spire_obj[i + 1] * 
+					spire_obj[i + 1] + spire_obj[i + 2] * spire_obj[i + 2], 0.5);
+
+				spire_obj[i] += (ratio * spire_obj[i] - spire_obj[i]) / step;
+				spire_obj[i + 1] += (ratio * spire_obj[i + 1] - spire_obj[i + 1]) / step;
+				spire_obj[i + 2] += (ratio * spire_obj[i + 2] - spire_obj[i + 2]) / step;
 			}
 
 			step -= 1;
@@ -149,13 +162,15 @@ int main()
 		}
 		else
 		{
-			
 			for (int i = 0; i != n_triangles * 3 * 3; i += 3)
 			{
-				ratio = spire_height * 0.5 * size / (size * 0.5 * spire_obj2[i + 1] + spire_height * spire_obj2[i + 2]);
-				spire_obj2[i] -= (ratio * spire_obj2[i] - spire_obj2[i]) / step; // the order is reversed because step is negative
-				spire_obj2[i + 1] -= (ratio * spire_obj2[i + 1] - spire_obj2[i + 1]) / step;
-				spire_obj2[i + 2] -= (ratio * spire_obj2[i + 2] - spire_obj2[i + 2]) / step;
+				ratio = spire_height * 0.5 * size / (size * 0.5 * spire_obj[i + 1] + 
+					spire_height * spire_obj[i + 2]);
+
+				// the order is reversed because step is negative
+				spire_obj[i] -= (ratio * spire_obj[i] - spire_obj[i]) / step; 
+				spire_obj[i + 1] -= (ratio * spire_obj[i + 1] - spire_obj[i + 1]) / step;
+				spire_obj[i + 2] -= (ratio * spire_obj[i + 2] - spire_obj[i + 2]) / step;
 			}
 
 			step += 1;
@@ -166,12 +181,31 @@ int main()
 			}
 		}
 
+		// Save sanpshots
+		if (time_counter < glfwGetTime())
+		{
+			glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+			char char_num[9];
+			_itoa(time_counter, char_num, 10);
+			memcpy(cur_dir, dir, N);
+
+			FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, width, height, 3 * width, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
+			FreeImage_Save(FIF_BMP, image, strcat(strcat(cur_dir, char_num), end), 0);
+
+			FreeImage_Unload(image);
+
+			time_counter += 2; // Take snapshots every two seconds
+		}
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+
+	delete[] pixels;
 
 	glfwTerminate();
 
@@ -248,3 +282,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	if (fov >= 45.0f)
 		fov = 45.0f;
 }
+
+
+
