@@ -7,7 +7,7 @@
 #include "string.h"
 #include "Shader.h"
 #include "spire.h"
-#include "D:\\Materials\\Programming\\C++\\Libraries\\FreeImage\\Dist\\x64\\FreeImage.h"
+#include "FreeImage.h"
 
 unsigned int ID; // ID of the shader
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0); // current camera position

@@ -70,7 +70,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\Materials\Programming\C++\Libraries\glm\glm;D:\Materials\Programming\C++\Libraries\Glad;D:\Materials\Programming\C++\Libraries\GLFW\glfw-3.2.1.bin.WIN32\include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Materials\Programming\C++\Libraries\glm\glm;D:\Materials\Programming\C++\Libraries\Glad;D:\Materials\Programming\C++\Libraries\GLFW\glfw-3.2.1.bin.WIN32\include;D:\\Materials\Programming\C++\Libraries\FreeImage\Dist\x64\;$(IncludePath)</IncludePath>
     <LibraryPath>D:\Materials\Programming\C++\Libraries\FreeImage\Dist\x32;D:\Materials\Programming\C++\Libraries\GLFW\glfw-3.2.1.bin.WIN32\lib-vc2015;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
