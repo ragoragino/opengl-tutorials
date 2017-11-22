@@ -1,0 +1,1 @@
+My own exercises in OpenGl during learning the environment with https://learnopengl.com/
