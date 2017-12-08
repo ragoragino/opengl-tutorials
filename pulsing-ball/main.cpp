@@ -113,7 +113,7 @@ int main()
 		glEnableVertexAttribArray(0);
 
 		// each 2 * pi seconds the object makes one rotation
-		rotation_param = 2 * glfwGetTime() / theta; 
+		rotation_param = 0 * 2 * glfwGetTime() / theta; 
 				
 		for (int i = 0; i != 4; ++i)
 		{
@@ -191,7 +191,7 @@ int main()
 			memcpy(cur_dir, dir, N);
 
 			FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, width, height, 3 * width, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
-			FreeImage_Save(FIF_PNG, image, strcat(strcat(cur_dir, char_num), end), PNG_DEFAULT);
+			// FreeImage_Save(FIF_PNG, image, strcat(strcat(cur_dir, char_num), end), PNG_DEFAULT);
 
 			FreeImage_Unload(image);
 
