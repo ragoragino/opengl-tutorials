@@ -123,7 +123,7 @@
   <ItemGroup>
     <ClInclude Include="Meteor.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Circle.h" />
+    <ClInclude Include="Square.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="Perlin.h" />
     <ClInclude Include="Noise.h" />
@@ -135,7 +135,6 @@
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="fshader_skybox.fp" />
     <None Include="resources\fshader.fp" />
     <None Include="resources\fshader_earth.fp" />
     <None Include="resources\fshader_meteor.fp" />
@@ -155,7 +154,6 @@
     <None Include="resources\vshader_saturn_ring.vp" />
     <None Include="resources\vshader_skybox.vp" />
     <None Include="resources\vshader_sun.vp" />
-    <None Include="vshader_skybox.vp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

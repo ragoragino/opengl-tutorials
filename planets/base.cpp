@@ -8,8 +8,8 @@
 // #include "Perlin.h"
 #include "Solar.h"
 // #include "Texture.h"
-# include "Skybox.h"
-#include "Circle.h"
+#include "Skybox.h"
+#include "Square.h"
 #include "Meteor.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -81,10 +81,12 @@ int main()
 	init_buffers(); // Initialize noise buffers for sun
 
 	const unsigned int len = 100; // grid structure of sphere
+	const unsigned int len_meteor = 10;
 	const unsigned int size = 6 * len * len * 36; // number of points in sphere array
+	const unsigned int size_meteor = 6 * len_meteor * len_meteor * 36;
 	float * planet = sphere(len);
-	float * ring = circle();
-	float * meteor = meteor_f(len);
+	float * ring = square();
+	float * meteor = meteor_f(len_meteor);
 
 	// EARTH
 	unsigned int VAO_earth, VBO_earth;
@@ -172,7 +174,7 @@ int main()
 	glGenBuffers(1, &VBO_meteor);
 	glBindVertexArray(VAO_meteor);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_meteor);
-	glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), meteor, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, size_meteor * sizeof(float), meteor, GL_STATIC_DRAW);
 
 	// vertex positions
 	glEnableVertexAttribArray(0);
@@ -203,7 +205,7 @@ int main()
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 
-	// Set the uniform Matrix for shader - contains view and projection matrices
+	// Set the uniform Matrix for vertex shader - contains view and projection matrices
 	unsigned int uniformBlockIndexEarth = glGetUniformBlockIndex(earth_shader.ID, "Matrices");
 	unsigned int uniformBlockIndexSun = glGetUniformBlockIndex(sun_shader.ID, "Matrices");
 	unsigned int uniformBlockIndexMoon = glGetUniformBlockIndex(moon_shader.ID, "Matrices");
@@ -224,6 +226,25 @@ int main()
 	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	// Set the uniform DirLight for fragment shader - contains light properties
+	unsigned int uniformBlockIndexSaturn = glGetUniformBlockIndex(saturn_shader.ID, "DirLight");
+	unsigned int uniformBlockIndexMeteor = glGetUniformBlockIndex(meteor_shader.ID, "DirLight");
+
+	glUniformBlockBinding(saturn_shader.ID, uniformBlockIndexSaturn, 1);
+	glUniformBlockBinding(meteor_shader.ID, uniformBlockIndexMeteor, 1);
+
+	unsigned int uboDirLight;
+	glGenBuffers(1, &uboDirLight);
+
+	glBindBuffer(GL_UNIFORM_BUFFER, uboDirLight);
+	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::vec3), NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 1);
+	glBindBufferRange(GL_UNIFORM_BUFFER, 1, uboDirLight, 0, 2 * sizeof(glm::vec3));
+
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec3), glm::value_ptr(sunlight_ambient));
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(sunlight_diffuse));
+	glBindBuffer(GL_UNIFORM_BUFFER, 1);
 
 	// Set noise for Sun texture
 	sun_shader.use();
@@ -351,6 +372,7 @@ int main()
 		model_saturn = glm::scale(model_saturn, saturn_scale);
 
 		saturn_shader.set("model", model_saturn);
+		saturn_shader.set("viewPos", camera.Position); 
 
 		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
 
@@ -363,16 +385,19 @@ int main()
 		model_meteor = glm::scale(model_meteor, meteor_scale);
 
 		meteor_shader.set("model", model_meteor);
+		meteor_shader.set("viewPos", camera.Position);
 
-		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
-
+		glDrawArrays(GL_TRIANGLES, 0, 36 * len_meteor * len_meteor);
+		
+		/* // Polygon Mode of Meteors
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		meteor_poly_shader.use();
 
 		meteor_poly_shader.set("model", model_meteor);
 		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
-
+		*/
+		
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		glDisable(GL_CULL_FACE);
@@ -401,11 +426,12 @@ int main()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	
-	glfwTerminate();
 
 	delete[] planet;
-	delete[] ring;
+	delete[] ring;	
+	delete[] meteor;
+
+	glfwTerminate();
 
 	return 0;
 }

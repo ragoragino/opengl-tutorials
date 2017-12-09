@@ -1,10 +1,6 @@
 #pragma once
-#ifndef CAMERA_H
-#define CAMERA_H
 
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "Header.h"
 
 #include <vector>
 
@@ -22,7 +18,6 @@ const float PITCH = 0.0f;
 const float SPEED = 2.5f;
 const float SENSITIVTY = 0.05f;
 const float ZOOM = 45.0f;
-
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class Camera
@@ -129,4 +124,3 @@ private:
 		Up = glm::normalize(glm::cross(Right, Front));
 	}
 };
-#endif

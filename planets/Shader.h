@@ -158,5 +158,5 @@ void Shader::set(const std::string &name, unsigned int count, int * value) const
 template<>
 void Shader::set(const std::string &name, unsigned int count, glm::vec3 value[]) const
 {
-	glUniform3fv(glGetUniformLocation(ID, name.c_str()), count, &value[0].x);
+	glUniform3fv(glGetUniformLocation(ID, name.c_str()), count, glm::value_ptr(*value));
 }

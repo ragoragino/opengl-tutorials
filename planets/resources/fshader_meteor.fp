@@ -8,10 +8,18 @@
 
 out vec4 FragColor;
 
-// in vec2 TexCoords;
 in vec3 VerCoords;
+in vec3 Normal;
+in vec3 Direction;
+
+layout (std140) uniform DirLight
+{
+    vec3 ambient;
+    vec3 diffuse;
+};
 
 uniform vec3 planetCol;
+uniform vec3 viewPos;
 uniform int p[GRID];
 uniform float r[GRID];
 
@@ -34,8 +42,27 @@ float noise(float in_x)
 	return mix(c000, c100, sx);
 }
 
+// Directional Light
+vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
+{	
+    vec3 norm = normalize(normal);
+	vec3 lightDir = normalize(-direct);
+
+	// diffuse 
+	float diff = max(dot(norm, lightDir), 0.0);
+	vec3 diffuse = obj_col * diff * diffuse;
+
+	// ambient
+	vec3 ambient = obj_col * ambient;
+          
+	return diffuse + ambient; 
+}
+
 void main()
 {
-	gl_FragColor = vec4(planetCol, 1.0f); 
+	vec3 light = vec3(0.0f);
+	light += DirectionalLight(Direction, Normal, planetCol);
+
+	gl_FragColor = vec4(light * planetCol, 1.0f); 
 }
 

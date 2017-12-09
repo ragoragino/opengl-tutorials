@@ -53,10 +53,10 @@
     <ClInclude Include="Skybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Circle.h">
+    <ClInclude Include="Meteor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Meteor.h">
+    <ClInclude Include="Square.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -86,12 +86,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resources\vshader_moon.vp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="fshader_skybox.fp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="vshader_skybox.vp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resources\fshader_skybox.fp">

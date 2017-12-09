@@ -4,7 +4,7 @@
 # define GRID 256
 
 /*
-Arrays and initializer for a simple noise function.
+Arrays and initializer for a noise function.
 The implementation is also in fragment shaders.
 */
 

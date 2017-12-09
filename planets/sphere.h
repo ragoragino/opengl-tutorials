@@ -1,10 +1,10 @@
 #pragma once
 #define _USE_MATH_DEFINES 
 #include "math.h"
+#include "Header.h"
 
 float * sphere(unsigned int n, float size = 2.0f)
 {
-	
 	float base_sq[] = {
 		-size / 2, -size / 2, size / 2, 0.0f, 0.0f, 1.0f,
 		-size / 2 + size / n, -size / 2, size / 2, 0.0f, 0.0f, 1.0f,
@@ -56,7 +56,7 @@ float * sphere(unsigned int n, float size = 2.0f)
 		coef_23 = -sin(i * M_PI * 0.5f);
 		coef_33 = cos(i * M_PI * 0.5f);
 
-		for (int j = 0; j != 36 * n * n; j += 6)
+		for (int j = 0; j < 36 * n * n; j += 6)
 		{
 			square[side_offset + j] = square[j];
 			square[side_offset + j + 1] = square[j + 1] * coef_22 + square[j + 2] * coef_23;
@@ -75,7 +75,7 @@ float * sphere(unsigned int n, float size = 2.0f)
 
 	side_offset = 4 * 36 * n * n;
 
-	for (int j = 0; j != 36 * n * n; j += 6)
+	for (int j = 0; j < 36 * n * n; j += 6)
 	{
 		square[side_offset + j] = square[j] * coef_11 + square[j + 2] * coef_13;
 		square[side_offset + j + 1] = square[j + 1];
@@ -93,7 +93,7 @@ float * sphere(unsigned int n, float size = 2.0f)
 
 	side_offset = 5 * 36 * n * n;
 
-	for (int j = 0; j != 36 * n * n; j += 6)
+	for (int j = 0; j < 36 * n * n; j += 6)
 	{
 		square[side_offset + j] = square[j] * coef_11 + square[j + 2] * coef_13;
 		square[side_offset + j + 1] = square[j + 1];
@@ -108,15 +108,28 @@ float * sphere(unsigned int n, float size = 2.0f)
 	float tmp_y = 0.0f;
 	float tmp_z = 0.0f;
 
-	for (int i = 0; i != 6 * n * n * 36; i += 3)
+	for (int i = 0; i < 6 * n * n * 36; i += 6)
 	{
-		tmp_x = square[i] * pow(1.0 - 0.5 * square[i + 1] * square[i + 1] - 0.5 * square[i + 2] * square[i + 2] + 0.33333 * square[i + 1] * square[i + 1] * square[i + 2] * square[i + 2], 0.5);
-		tmp_y = square[i + 1] * pow(1.0 - 0.5 * square[i + 2] * square[i + 2] - 0.5 * square[i] * square[i] + 0.33333 * square[i] * square[i] * square[i + 2] * square[i + 2], 0.5);
-		tmp_z = square[i + 2] * pow(1.0 - 0.5 * square[i + 1] * square[i + 1] - 0.5 * square[i] * square[i] + 0.33333 * square[i + 1] * square[i + 1] * square[i] * square[i], 0.5);
+		tmp_x = pow(1.0 - 0.5 * square[i + 1] * square[i + 1] - 0.5 * square[i + 2] * square[i + 2] + 0.33333 * square[i + 1] * square[i + 1] * square[i + 2] * square[i + 2], 0.5);
+		tmp_y = pow(1.0 - 0.5 * square[i + 2] * square[i + 2] - 0.5 * square[i] * square[i] + 0.33333 * square[i] * square[i] * square[i + 2] * square[i + 2], 0.5);
+		tmp_z = pow(1.0 - 0.5 * square[i + 1] * square[i + 1] - 0.5 * square[i] * square[i] + 0.33333 * square[i + 1] * square[i + 1] * square[i] * square[i], 0.5);
 
-		square[i] = tmp_x;
-		square[i + 1] = tmp_y;
-		square[i + 2] = tmp_z;
+		square[i] *= tmp_x;
+		square[i + 1] *= tmp_y;
+		square[i + 2] *= tmp_z;
+
+		// Adjustment of normals
+		glm::mat3 tmp_mat = glm::mat3(
+			tmp_x, 0.0f, 0.0f, 
+			0.0f, tmp_y, 0.0f,
+			0.0f, 0.0f, tmp_z
+		);
+
+		glm::vec3 normal = glm::normalize(glm::transpose(glm::inverse(tmp_mat)) * glm::vec3(square[i + 3], square[i + 4], square[i + 5]));
+
+		square[i + 3] = normal.x;
+		square[i + 4] = normal.y;
+		square[i + 5] = normal.z;
 	}
 
 	return square;
