@@ -184,6 +184,29 @@ int main()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
+	// METEOR RING
+	glm::mat4 * meteor_rings = init_meteor_rings();
+	unsigned int VBO_meteor_ring;
+	glGenBuffers(1, &VBO_meteor_ring);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_meteor_ring);
+	glBufferData(GL_ARRAY_BUFFER, n_meteors * sizeof(glm::mat4), glm::value_ptr(*meteor_rings), GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+	glEnableVertexAttribArray(5);
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+	glVertexAttribDivisor(2, 1);
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+	glVertexAttribDivisor(5, 1);
+
+	glBindVertexArray(0);
+
 	// SKYBOX
 	unsigned int VAO_skybox, VBO_skybox;
 	glGenVertexArrays(1, &VAO_skybox);
@@ -230,20 +253,22 @@ int main()
 	// Set the uniform DirLight for fragment shader - contains light properties
 	unsigned int uniformBlockIndexSaturn = glGetUniformBlockIndex(saturn_shader.ID, "DirLight");
 	unsigned int uniformBlockIndexMeteor = glGetUniformBlockIndex(meteor_shader.ID, "DirLight");
+	unsigned int uniformBlockIndexEarth2 = glGetUniformBlockIndex(earth_shader.ID, "DirLight");
 
 	glUniformBlockBinding(saturn_shader.ID, uniformBlockIndexSaturn, 1);
 	glUniformBlockBinding(meteor_shader.ID, uniformBlockIndexMeteor, 1);
+	glUniformBlockBinding(earth_shader.ID, uniformBlockIndexEarth2, 1);
 
 	unsigned int uboDirLight;
 	glGenBuffers(1, &uboDirLight);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, uboDirLight);
-	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::vec3), NULL, GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::vec4), NULL, GL_STATIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 1);
-	glBindBufferRange(GL_UNIFORM_BUFFER, 1, uboDirLight, 0, 2 * sizeof(glm::vec3));
+	glBindBufferRange(GL_UNIFORM_BUFFER, 1, uboDirLight, 0, 2 * sizeof(glm::vec4));
 
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec3), glm::value_ptr(sunlight_ambient));
-	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(sunlight_diffuse));
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), glm::value_ptr(sunlight_ambient));
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), sizeof(glm::vec4), glm::value_ptr(sunlight_diffuse));
 	glBindBuffer(GL_UNIFORM_BUFFER, 1);
 
 	// Set noise for Sun texture
@@ -264,6 +289,8 @@ int main()
 
 	earth_shader.use();
 	earth_shader.set("planetCol", earth_color);
+	earth_shader.set("p", SIZE, p); // GRID instead of SIZE -> only 1D Perlin
+	earth_shader.set("r", GRID, r);
 
 	saturn_shader.use();
 	saturn_shader.set("p", GRID, p); // GRID instead of SIZE -> only 1D Perlin
@@ -327,6 +354,7 @@ int main()
 		model_earth = glm::scale(model_earth, earth_scale);
 
 		earth_shader.set("model", model_earth);
+		earth_shader.set("viewPos", camera.Position);
 		
 		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
 	
@@ -381,13 +409,22 @@ int main()
 
 		meteor_shader.use();
 
-		glm::mat4 model_meteor = glm::translate(glm::mat4(), meteor_pos);
-		model_meteor = glm::scale(model_meteor, meteor_scale);
+		float meteor_x = meteor_distance * glm::sin(meteor_dispos * currentFrame);
+		float meteor_z = - meteor_distance * glm::cos(meteor_dispos * currentFrame);
+
+		glm::mat4 model_meteor = {
+			glm::vec4(0.0f),
+			glm::vec4(0.0f),
+			glm::vec4(0.0f),
+			glm::vec4(meteor_x, 0.0f, meteor_z, 1.0f) 
+		};
 
 		meteor_shader.set("model", model_meteor);
 		meteor_shader.set("viewPos", camera.Position);
 
-		glDrawArrays(GL_TRIANGLES, 0, 36 * len_meteor * len_meteor);
+		glDrawArraysInstanced(GL_TRIANGLES, 0, 36 * len_meteor * len_meteor, n_meteors);
+
+		// glDrawArrays(GL_TRIANGLES, 0, 36 * len_meteor * len_meteor);
 		
 		/* // Polygon Mode of Meteors
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -430,6 +467,7 @@ int main()
 	delete[] planet;
 	delete[] ring;	
 	delete[] meteor;
+	delete[] meteor_rings;
 
 	glfwTerminate();
 

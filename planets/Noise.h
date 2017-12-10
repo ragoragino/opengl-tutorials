@@ -52,7 +52,7 @@ void init_buffers()
 
 	for (int i = 0; i != GRID; ++i)
 	{
-		r[i] = rand() / (RAND_MAX + 1.0);
+		r[i] = (float)rand() / (float)RAND_MAX;
 	}
 }
 

@@ -50,12 +50,12 @@ vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
 
 	// diffuse 
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = obj_col * diff * diffuse;
+	vec3 diffuse_obj = obj_col * diff * diffuse;
 
 	// ambient
-	vec3 ambient = obj_col * ambient;
+	vec3 ambient_obj = obj_col * ambient;
           
-	return ambient + diffuse; 
+	return ambient_obj + diffuse_obj; 
 }
 
 void main()

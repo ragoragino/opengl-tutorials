@@ -1,12 +1,13 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
+layout (location = 2) in mat4 ring;
 
 out vec3 VerCoords;
 out vec3 Normal;
 out vec3 Direction;
-
 uniform mat4 model;
+
 layout (std140) uniform Matrices
 {
     mat4 projection;
@@ -16,7 +17,7 @@ layout (std140) uniform Matrices
 void main()
 {
 	VerCoords = aPos;
-	Normal = mat3(transpose(inverse(model))) * aPos;
-	Direction = vec3(model * vec4(aPos, 1.0));
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+	Normal = mat3(transpose(inverse(model + ring))) * aPos;
+	Direction = vec3((model + ring) * vec4(aPos, 1.0));
+    gl_Position = projection * view * (model + ring) * vec4(aPos, 1.0);
 }

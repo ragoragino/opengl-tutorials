@@ -63,6 +63,6 @@ void main()
 	vec3 light = vec3(0.0f);
 	light += DirectionalLight(Direction, Normal, planetCol);
 
-	gl_FragColor = vec4(light * planetCol, 1.0f); 
+	gl_FragColor = 1.1f * vec4(light * planetCol, 1.0f); 
 }
 
