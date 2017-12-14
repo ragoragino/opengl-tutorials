@@ -8,7 +8,6 @@
 
 out vec4 FragColor;
 
-in vec3 VerCoords;
 in vec3 Normal;
 in vec3 Direction;
 
@@ -55,14 +54,13 @@ vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
 	// ambient
 	vec3 ambient = obj_col * ambient;
           
-	return diffuse + ambient; 
+	return diffuse; 
 }
 
 void main()
 {
 	vec3 light = vec3(0.0f);
 	light += DirectionalLight(Direction, Normal, planetCol);
-
 	gl_FragColor = 1.1f * vec4(light * planetCol, 1.0f); 
 }
 

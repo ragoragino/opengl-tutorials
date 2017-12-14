@@ -17,7 +17,7 @@ const float saturn_dispos = 2 * M_PI / saturn_speed; // angular change for one s
 const float meteor_dispos = 2 * M_PI / meteor_speed;
 
 // INITIAL POSITIONS
-const glm::vec3 sun_pos = glm::vec3(0.0f, 0.0f, 0.0f);
+const glm::vec3 sun_pos = glm::vec3(0.0f, 0.0f, 0.0f); // SUN MUST BE POSITIONED IN THE CENTRE !!!
 const glm::vec3 earth_pos = glm::vec3(0.0f, 0.0f, -earth_distance);
 const glm::vec3 moon_pos = glm::vec3(moon_distance, 0.0f, -earth_distance);
 const glm::vec3 saturn_pos = glm::vec3(0.0f, 0.0f, -saturn_distance);
@@ -40,9 +40,13 @@ glm::vec3 saturn_ring_color = glm::vec3(0.804f, 0.522f, 0.247f);
 glm::vec3 meteor_color = glm::vec3(0.502f, 0.502f, 0.502f);
 
 // ROTATIONS
+const float earth_rotation = 5.0f;
+const float saturn_rotation = 10.0f;
+
+// ANGLES
 float saturn_angle = 15.0f;
 
 // LIGHTS
-glm::vec3 sunlight_diffuse(0.2f);
+glm::vec3 sunlight_diffuse(0.6f);
 glm::vec3 sunlight_ambient(0.2f);
 

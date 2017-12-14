@@ -5,8 +5,9 @@
 #include "Solar.h"
 
 #include <random>
+#include <functional>
 
-int n_meteors = 1000;
+const int N_METEORS = 1000; // Must be also defined in meteor fragment shaders !!!
 
 float * meteor_f(unsigned int n, unsigned int offset = 6, float in_ampl = 0.2f, float in_freq = 0.1f, 
 	float ampl_mult = 0.35f, float freq_mult = 1.5f, unsigned int octave = 5, float magnitude = 0.5f)
@@ -21,7 +22,7 @@ float * meteor_f(unsigned int n, unsigned int offset = 6, float in_ampl = 0.2f, 
 	float freq;
 	float ampl;
 	
-	for (int i = 0; i < 6 * n * n * 36; i += 6)
+	for (int i = 0; i < 6 * n * n * 18; i += 3)
 	{
 		freq = in_freq;
 		ampl = in_ampl;
@@ -44,38 +45,45 @@ float * meteor_f(unsigned int n, unsigned int offset = 6, float in_ampl = 0.2f, 
 		meteor[i] *= frac_noise + magnitude;
 		meteor[i + 1] *= frac_noise + magnitude;
 		meteor[i + 2] *= frac_noise + magnitude;
-
-		// Normals adjustment
-		glm::mat3 tmp_mat = glm::mat3(
-			frac_noise + magnitude, 0.0f, 0.0f,
-			0.0f, frac_noise + magnitude, 0.0f,
-			0.0f, 0.0f, frac_noise + magnitude
-		);
-
-		glm::vec3 normal = glm::normalize(glm::transpose(glm::inverse(tmp_mat)) * glm::vec3(meteor[i + 3], meteor[i + 4], meteor[i + 5]));
-
-		meteor[i + 3] = normal.x;
-		meteor[i + 4] = normal.y;
-		meteor[i + 5] = normal.z;
 	}
 	
 	return meteor;
 }
 
-glm::mat4 * init_meteor_rings()
+glm::mat4 * InitializeMeteorRing(float x_offset = 1.0f, float y_offset = 0.05f, float z_offset = 1.0f)
 {
-	glm::mat4 * meteor_rings = new glm::mat4[n_meteors * 2];
+	glm::mat4 * meteor_rings = new glm::mat4[N_METEORS];
 	float x, z, random;
 
-	for (unsigned int i = 0; i < n_meteors * 2; i +=2)
+	for (unsigned int i = 0; i < N_METEORS; i += 1)
 	{
 		random = (float)rand() / (float)RAND_MAX;
 		x = meteor_distance * sin(2.0f * M_PI * random);
 		z = meteor_distance * cos(2.0f * M_PI * random);
-		meteor_rings[i] = glm::translate(glm::mat4(), glm::vec3(x, 0.05f * meteor_distance * (float)rand() / (float)RAND_MAX, z));
-		meteor_rings[i] = glm::rotate(meteor_rings[i], (float)(rand() % 360), glm::vec3(x, random, z));
+		meteor_rings[i] = glm::translate(glm::mat4(), 
+			glm::vec3(x + x_offset * (float)rand() / (float) RAND_MAX,
+			y_offset * meteor_distance * (float)rand() / (float)RAND_MAX,
+			z + z_offset * (float)rand() / (float)RAND_MAX
+			));
+		meteor_rings[i] = glm::rotate(meteor_rings[i], (float)(rand() % 360), glm::vec3(x, (float)rand() / (float)RAND_MAX, z));
 		meteor_rings[i] = glm::scale(meteor_rings[i], meteor_scale * (0.5f + (float)rand() / (float)RAND_MAX));
 	}
 
 	return meteor_rings;
 }
+
+// Sinusoid movement
+float * InitializeMeteorRingFlucation(int fluctation_length = 5)
+{
+	float * meteor_ring_fluctuation = new float[N_METEORS];
+
+	for (int i = 0; i < N_METEORS; ++i)
+	{
+		// The values need to be continuous!
+		meteor_ring_fluctuation[i] = sin(2 * M_PI * i / (N_METEORS / fluctation_length ) );
+	}
+
+	return meteor_ring_fluctuation;
+}
+
+

@@ -82,75 +82,23 @@ int main()
 
 	const unsigned int len = 100; // grid structure of sphere
 	const unsigned int len_meteor = 10;
-	const unsigned int size = 6 * len * len * 36; // number of points in sphere array
-	const unsigned int size_meteor = 6 * len_meteor * len_meteor * 36;
+	const unsigned int size = 6 * len * len * 18; // number of points in sphere array
+	const unsigned int size_meteor = 6 * len_meteor * len_meteor * 18;
 	float * planet = sphere(len);
 	float * ring = square();
 	float * meteor = meteor_f(len_meteor);
 
-	// EARTH
-	unsigned int VAO_earth, VBO_earth;
-	glGenVertexArrays(1, &VAO_earth);
-	glGenBuffers(1, &VBO_earth);
-	glBindVertexArray(VAO_earth);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_earth);
+	// Planet
+	unsigned int VAO_planet, VBO_planet;
+	glGenVertexArrays(1, &VAO_planet);
+	glGenBuffers(1, &VBO_planet);
+	glBindVertexArray(VAO_planet);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_planet);
 	glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), planet, GL_STATIC_DRAW);
 
 	// vertex positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-
-	// vertex normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-
-	// SUN
-	unsigned int VAO_sun, VBO_sun;
-	glGenVertexArrays(1, &VAO_sun);
-	glGenBuffers(1, &VBO_sun);
-	glBindVertexArray(VAO_sun);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_sun);
-	glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), planet, GL_STATIC_DRAW);
-
-	// vertex positions
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-
-	// vertex normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-
-	// MOON
-	unsigned int VAO_moon, VBO_moon;
-	glGenVertexArrays(1, &VAO_moon);
-	glGenBuffers(1, &VBO_moon);
-	glBindVertexArray(VAO_moon);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_moon);
-	glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), planet, GL_STATIC_DRAW);
-
-	// vertex positions
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-
-	// vertex normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-
-	// SATURN
-	unsigned int VAO_saturn, VBO_saturn;
-	glGenVertexArrays(1, &VAO_saturn);
-	glGenBuffers(1, &VBO_saturn);
-	glBindVertexArray(VAO_saturn);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_saturn);
-	glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), planet, GL_STATIC_DRAW);
-
-	// vertex positions
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-
-	// vertex normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 	// SATURN RING
 	unsigned int VAO_saturn_ring, VBO_saturn_ring;
@@ -178,32 +126,46 @@ int main()
 
 	// vertex positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-
-	// vertex normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 	// METEOR RING
-	glm::mat4 * meteor_rings = init_meteor_rings();
+	glm::mat4 * meteor_rings = InitializeMeteorRing();
 	unsigned int VBO_meteor_ring;
 	glGenBuffers(1, &VBO_meteor_ring);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_meteor_ring);
-	glBufferData(GL_ARRAY_BUFFER, n_meteors * sizeof(glm::mat4), glm::value_ptr(*meteor_rings), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, N_METEORS * sizeof(glm::mat4), glm::value_ptr(*meteor_rings), GL_STATIC_DRAW);
 
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
-	glEnableVertexAttribArray(5);
-	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
 
+	glVertexAttribDivisor(1, 1);
 	glVertexAttribDivisor(2, 1);
 	glVertexAttribDivisor(3, 1);
 	glVertexAttribDivisor(4, 1);
+
+	// METEOR RING y OFFSET
+	float * meteor_ring_fluctation = InitializeMeteorRingFlucation(); 
+	int * meteor_order = new int[N_METEORS];
+	for(int i = N_METEORS, j = 0; j < N_METEORS; --i, ++j)
+	{
+		meteor_order[j] = i;
+	}
+
+	unsigned int VBO_meteor_ring_fluctuation;
+	glGenBuffers(1, &VBO_meteor_ring_fluctuation);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_meteor_ring_fluctuation);
+	glBufferData(GL_ARRAY_BUFFER, N_METEORS * sizeof(int), meteor_order, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(5);
+	glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(int), (void*)0);
 	glVertexAttribDivisor(5, 1);
+	glEnableVertexAttribArray(0);
 
 	glBindVertexArray(0);
 
@@ -223,10 +185,6 @@ int main()
 	// vertex normals
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
 
 	// Set the uniform Matrix for vertex shader - contains view and projection matrices
 	unsigned int uniformBlockIndexEarth = glGetUniformBlockIndex(earth_shader.ID, "Matrices");
@@ -292,8 +250,8 @@ int main()
 	earth_shader.set("p", SIZE, p); // GRID instead of SIZE -> only 1D Perlin
 	earth_shader.set("r", GRID, r);
 
-	saturn_shader.use();
-	saturn_shader.set("p", GRID, p); // GRID instead of SIZE -> only 1D Perlin
+	saturn_shader.use(); // TODO 512
+	saturn_shader.set("p", 512, p); // GRID instead of SIZE -> only 1D Perlin
 	saturn_shader.set("r", GRID, r);
 	saturn_shader.set("planetCol", saturn_color);
 
@@ -306,6 +264,12 @@ int main()
 	meteor_shader.set("p", GRID, p); // GRID instead of SIZE -> only 1D Perlin
 	meteor_shader.set("r", GRID, r);
 	meteor_shader.set("planetCol", meteor_color);
+	meteor_shader.set("offset", N_METEORS, meteor_ring_fluctation);
+	int meteor_counter = 0;
+
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 	
 	while (!glfwWindowShouldClose(window)) // render loop
 	{
@@ -343,7 +307,7 @@ int main()
 		glCullFace(GL_BACK);
 		glFrontFace(GL_CCW);
 
-		glBindVertexArray(VBO_earth);
+		glBindVertexArray(VAO_planet);
 
 		earth_shader.use(); 
 
@@ -352,6 +316,7 @@ int main()
 
 		glm::mat4 model_earth = glm::translate(glm::mat4(), glm::vec3(earth_x, 0.0f, earth_z));
 		model_earth = glm::scale(model_earth, earth_scale);
+		model_earth = glm::rotate(model_earth, (float)(- 2.0f * M_PI * currentFrame / earth_rotation), glm::vec3(0.0f, 1.0f, 0.0f)); // Axis rotation
 
 		earth_shader.set("model", model_earth);
 		earth_shader.set("viewPos", camera.Position);
@@ -359,20 +324,16 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
 	
 		// SUN RENDERING
-		glBindVertexArray(VAO_sun);
-
 		sun_shader.use();
 
-		glm::mat4 model_sun = glm::translate(glm::mat4(1.0f), sun_pos);
-		model_sun = glm::scale(model_sun, sun_scale);
+		// Sun is always in the centre - no translation needed
+		glm::mat4 model_sun = glm::scale(glm::mat4(), sun_scale);
 
 		sun_shader.set("model", model_sun);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
 		
 		// MOON RENDERING
-		glBindVertexArray(VAO_sun);
-
 		moon_shader.use();
 
 		float moon_z = glm::sin(moon_dispos * currentFrame) * moon_distance + earth_z;
@@ -386,18 +347,20 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
 
 		// SATURN RENDERING
-		glBindVertexArray(VAO_saturn);
-
 		saturn_shader.use();
 
 		float saturn_x = saturn_distance * glm::sin(saturn_dispos * currentFrame);
 		float saturn_z = -saturn_distance * glm::cos(saturn_dispos * currentFrame);
 
+		// Get the vector on which to rotate Saturn
 		glm::vec3 saturn_rotate = glm::cross(glm::vec3(saturn_x, 0.0f, saturn_z), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		glm::mat4 model_saturn = glm::translate(glm::mat4(), glm::vec3(saturn_x, 0.0f, saturn_z));
 		model_saturn = glm::rotate(model_saturn, glm::radians(saturn_angle), saturn_rotate);
 		model_saturn = glm::scale(model_saturn, saturn_scale);
+
+		// Keep Saturn always rotated towards the Sun
+		model_saturn = glm::rotate(model_saturn, (float)(-2.0f * M_PI * currentFrame / saturn_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		saturn_shader.set("model", model_saturn);
 		saturn_shader.set("viewPos", camera.Position); 
@@ -409,33 +372,15 @@ int main()
 
 		meteor_shader.use();
 
-		float meteor_x = meteor_distance * glm::sin(meteor_dispos * currentFrame);
-		float meteor_z = - meteor_distance * glm::cos(meteor_dispos * currentFrame);
-
-		glm::mat4 model_meteor = {
-			glm::vec4(0.0f),
-			glm::vec4(0.0f),
-			glm::vec4(0.0f),
-			glm::vec4(meteor_x, 0.0f, meteor_z, 1.0f) 
-		};
+		// Move the meteors
+		glm::mat4 model_meteor = glm::rotate(glm::mat4(), - meteor_dispos * currentFrame, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		meteor_shader.set("model", model_meteor);
 		meteor_shader.set("viewPos", camera.Position);
+		meteor_counter = (meteor_counter + 1) % N_METEORS;
+		meteor_shader.set("i", meteor_counter);
 
-		glDrawArraysInstanced(GL_TRIANGLES, 0, 36 * len_meteor * len_meteor, n_meteors);
-
-		// glDrawArrays(GL_TRIANGLES, 0, 36 * len_meteor * len_meteor);
-		
-		/* // Polygon Mode of Meteors
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-		meteor_poly_shader.use();
-
-		meteor_poly_shader.set("model", model_meteor);
-		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
-		*/
-		
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDrawArraysInstanced(GL_TRIANGLES, 0, 36 * len_meteor * len_meteor, N_METEORS);
 
 		glDisable(GL_CULL_FACE);
 
@@ -468,6 +413,7 @@ int main()
 	delete[] ring;	
 	delete[] meteor;
 	delete[] meteor_rings;
+	delete[] meteor_ring_fluctation;
 
 	glfwTerminate();
 

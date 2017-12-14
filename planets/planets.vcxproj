@@ -123,6 +123,7 @@
   <ItemGroup>
     <ClInclude Include="Meteor.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Planet.h" />
     <ClInclude Include="Square.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="Perlin.h" />

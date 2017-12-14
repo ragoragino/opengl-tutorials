@@ -39,10 +39,10 @@ void main()
 	float distance = VerCoords.x * VerCoords.x + VerCoords.z * VerCoords.z;
 
 	float frac_noise = 0.0f;
-	float ampl = 1.0f;
+	float ampl = 0.5f;
 	float freq = 1.0f;
-	float ampl_mult = 0.35f;
-	float freq_mult = 1.8f;
+	float ampl_mult = 0.1f;
+	float freq_mult = 1.0f;
 	vec3 frac_vec = VerCoords * freq;
 	for(int i = 0; i != 5; ++i)
 	{

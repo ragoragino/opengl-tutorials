@@ -1,12 +1,14 @@
 #version 330 core
+#define N_METEORS 1000
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in mat4 ring;
+layout (location = 1) in mat4 ring;
+layout (location = 5) in int order;
 
-out vec3 VerCoords;
 out vec3 Normal;
 out vec3 Direction;
 uniform mat4 model;
+uniform float offset[N_METEORS];
+uniform int i;
 
 layout (std140) uniform Matrices
 {
@@ -16,8 +18,12 @@ layout (std140) uniform Matrices
 
 void main()
 {
-	VerCoords = aPos;
-	Normal = mat3(transpose(inverse(model + ring))) * aPos;
-	Direction = vec3((model + ring) * vec4(aPos, 1.0));
-    gl_Position = projection * view * (model + ring) * vec4(aPos, 1.0);
+	mat4 translate = mat4(vec4(1.0f, 0.0f, 0.0f, 0.0f), 
+					vec4(0.0f, 1.0f, 0.0f, 0.0f),
+					vec4(0.0f, 0.0f, 1.0f, 0.0f), 
+					vec4(0.0f, offset[int(mod(i + order, N_METEORS))], 0.0f, 1.0f));
+	Normal = transpose(inverse(mat3(model * ring))) * aPos;
+	vec4 tmp_model = model * ring * vec4(aPos, 1.0f);
+	Direction = vec3(tmp_model);
+    gl_Position = projection * view * translate * tmp_model;
 }
