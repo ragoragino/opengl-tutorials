@@ -1,5 +1,4 @@
 # pragma once
-# include <random>
 # define SIZE 768
 # define GRID 256
 

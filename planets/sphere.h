@@ -3,20 +3,20 @@
 #include "math.h"
 #include "Header.h"
 
-float * sphere(unsigned int n, float size = 2.0f)
+float * sphere(int n, float size = 2.0f)
 {
 	float base_sq[] = {
-		-size / 2, -size / 2, size / 2,
-		-size / 2 + size / n, -size / 2, size / 2,
-		-size / 2, -size / 2 + size / n, size / 2, 
+		-size / 2.0f, -size / 2.0f, size / 2.0f,
+		-size / 2.0f + size / n, -size / 2.0f, size / 2.0f,
+		-size / 2.0f, -size / 2.0f + size / n, size / 2.0f,
 
-		-size / 2, -size / 2 + size / n, size / 2,
-		-size / 2 + size / n, -size / 2, size / 2,
-		-size / 2 + size / n, -size / 2 + size / n, size / 2, 
+		-size / 2.0f, -size / 2.0f + size / n, size / 2.0f,
+		-size / 2.0f + size / n, -size / 2.0f, size / 2.0f,
+		-size / 2.0f + size / n, -size / 2.0f + size / n, size / 2.0f,
 	};
 	
 	float * square = new float[6 * n * n * 18];
-	unsigned int base_length = 18;
+	int base_length = 18;
 
 	// Front side of the square
 	for (int i = 0; i != n; ++i)
@@ -49,10 +49,10 @@ float * sphere(unsigned int n, float size = 2.0f)
 	{
 		side_offset = i * base_length * n * n;
 
-		coef_22 = cos(i * M_PI * 0.5f);
-		coef_32 = sin(i * M_PI * 0.5f);
-		coef_23 = -sin(i * M_PI * 0.5f);
-		coef_33 = cos(i * M_PI * 0.5f);
+		coef_22 = (float)cos(i * M_PI * 0.5f);
+		coef_32 = (float)sin(i * M_PI * 0.5f);
+		coef_23 = (float)-sin(i * M_PI * 0.5f);
+		coef_33 = (float)cos(i * M_PI * 0.5f);
 
 		for (int j = 0; j < base_length * n * n; j += 3)
 		{
@@ -63,10 +63,10 @@ float * sphere(unsigned int n, float size = 2.0f)
 	}
 
 	// Rotation by y axis - > 90 degress
-	coef_11 = cos(M_PI * 0.5f);
-	coef_31 = -sin(M_PI * 0.5f);
-	coef_13 = sin(M_PI * 0.5f);
-	coef_33 = cos(M_PI * 0.5f);
+	coef_11 = (float)cos(M_PI * 0.5f);
+	coef_31 = (float)-sin(M_PI * 0.5f);
+	coef_13 = (float)sin(M_PI * 0.5f);
+	coef_33 = (float)cos(M_PI * 0.5f);
 
 	side_offset = 4 * base_length * n * n;
 
@@ -78,10 +78,10 @@ float * sphere(unsigned int n, float size = 2.0f)
 	}
 
 	// Rotation by y axis - > 270 degress
-	coef_11 = cos(3.0f * M_PI * 0.5f);
-	coef_31 = -sin(3.0 * M_PI * 0.5f);
-	coef_13 = sin(3.0f * M_PI * 0.5f);
-	coef_33 = cos(3.0f * M_PI * 0.5f);
+	coef_11 = (float)cos(3.0f * M_PI * 0.5f);
+	coef_31 = (float)-sin(3.0 * M_PI * 0.5f);
+	coef_13 = (float)sin(3.0f * M_PI * 0.5f);
+	coef_33 = (float)cos(3.0f * M_PI * 0.5f);
 
 	side_offset = 5 * base_length * n * n;
 
@@ -99,9 +99,9 @@ float * sphere(unsigned int n, float size = 2.0f)
 
 	for (int i = 0; i < 6 * n * n * base_length; i += 3)
 	{
-		tmp_x = pow(1.0 - 0.5 * square[i + 1] * square[i + 1] - 0.5 * square[i + 2] * square[i + 2] + 0.33333 * square[i + 1] * square[i + 1] * square[i + 2] * square[i + 2], 0.5);
-		tmp_y = pow(1.0 - 0.5 * square[i + 2] * square[i + 2] - 0.5 * square[i] * square[i] + 0.33333 * square[i] * square[i] * square[i + 2] * square[i + 2], 0.5);
-		tmp_z = pow(1.0 - 0.5 * square[i + 1] * square[i + 1] - 0.5 * square[i] * square[i] + 0.33333 * square[i + 1] * square[i + 1] * square[i] * square[i], 0.5);
+		tmp_x = (float)pow(1.0 - 0.5 * square[i + 1] * square[i + 1] - 0.5 * square[i + 2] * square[i + 2] + 0.33333 * square[i + 1] * square[i + 1] * square[i + 2] * square[i + 2], 0.5);
+		tmp_y = (float)pow(1.0 - 0.5 * square[i + 2] * square[i + 2] - 0.5 * square[i] * square[i] + 0.33333 * square[i] * square[i] * square[i + 2] * square[i + 2], 0.5);
+		tmp_z = (float)pow(1.0 - 0.5 * square[i + 1] * square[i + 1] - 0.5 * square[i] * square[i] + 0.33333 * square[i + 1] * square[i + 1] * square[i] * square[i], 0.5);
 
 		square[i] *= tmp_x;
 		square[i + 1] *= tmp_y;

@@ -4,13 +4,10 @@
 #include "Header.h"
 #include "Solar.h"
 
-#include <random>
-#include <functional>
-
 const int N_METEORS = 1000; // Must be also defined in meteor fragment shaders !!!
 
-float * meteor_f(unsigned int n, unsigned int offset = 6, float in_ampl = 0.2f, float in_freq = 0.1f, 
-	float ampl_mult = 0.35f, float freq_mult = 1.5f, unsigned int octave = 5, float magnitude = 0.5f)
+float * meteor_f(int n, int offset = 6, float in_ampl = 0.2f, float in_freq = 0.1f, 
+	float ampl_mult = 0.35f, float freq_mult = 1.5f, int octave = 5, float magnitude = 0.5f)
 {
 	float * meteor = sphere(n);
 	
@@ -50,16 +47,16 @@ float * meteor_f(unsigned int n, unsigned int offset = 6, float in_ampl = 0.2f, 
 	return meteor;
 }
 
-glm::mat4 * InitializeMeteorRing(float x_offset = 1.0f, float y_offset = 0.05f, float z_offset = 1.0f)
+glm::mat4* InitializeMeteorRing(float x_offset = 1.0f, float y_offset = 0.05f, float z_offset = 1.0f)
 {
 	glm::mat4 * meteor_rings = new glm::mat4[N_METEORS];
 	float x, z, random;
 
-	for (unsigned int i = 0; i < N_METEORS; i += 1)
+	for (int i = 0; i < N_METEORS; i += 1)
 	{
 		random = (float)rand() / (float)RAND_MAX;
-		x = meteor_distance * sin(2.0f * M_PI * random);
-		z = meteor_distance * cos(2.0f * M_PI * random);
+		x = meteor_distance * (float)sin(2.0f * M_PI * random);
+		z = meteor_distance * (float)cos(2.0f * M_PI * random);
 		meteor_rings[i] = glm::translate(glm::mat4(), 
 			glm::vec3(x + x_offset * (float)rand() / (float) RAND_MAX,
 			y_offset * meteor_distance * (float)rand() / (float)RAND_MAX,
@@ -80,7 +77,7 @@ float * InitializeMeteorRingFlucation(int fluctation_length = 5)
 	for (int i = 0; i < N_METEORS; ++i)
 	{
 		// The values need to be continuous!
-		meteor_ring_fluctuation[i] = sin(2 * M_PI * i / (N_METEORS / fluctation_length ) );
+		meteor_ring_fluctuation[i] = (float)sin(2 * M_PI * i / (N_METEORS / fluctation_length ) );
 	}
 
 	return meteor_ring_fluctuation;

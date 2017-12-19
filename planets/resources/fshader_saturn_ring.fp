@@ -26,12 +26,12 @@ float noise(float in_x)
 	int rx0 = int(mod(floor_x, GRID));
 	int rx1 = int(mod(rx0 + 1, GRID));
 
-	float c000 = r[p[rx0]];
-	float c100 = r[p[rx1]];
+	float c0 = r[p[rx0]];
+	float c1 = r[p[rx1]];
 
 	float sx = smoothstep(0.0f, 1.0f, dist_x);
 
-	return mix(c000, c100, sx);
+	return mix(c0, c1, sx);
 }
 
 void main()
@@ -42,11 +42,11 @@ void main()
 	float ampl = 0.5f;
 	float freq = 1.0f;
 	float ampl_mult = 0.1f;
-	float freq_mult = 1.0f;
-	vec3 frac_vec = VerCoords * freq;
+	float freq_mult = 1.5f;
+	float frac_vec = distance * freq;
 	for(int i = 0; i != 5; ++i)
 	{
-		frac_noise += noise(distance) * ampl;
+		frac_noise += noise(frac_vec) * ampl;
 		ampl *= ampl_mult;
 		freq *= freq_mult;
 		frac_vec *= freq;

@@ -143,9 +143,11 @@
     <None Include="resources\fshader_poly_meteor.fp" />
     <None Include="resources\fshader_saturn.fp" />
     <None Include="resources\fshader_saturn_ring.fp" />
+    <None Include="resources\fshader_shadow.fp" />
     <None Include="resources\fshader_skybox.fp" />
     <None Include="resources\fshader_sun.fp" />
     <None Include="resources\fshader_sun_perlin.fp" />
+    <None Include="resources\gshader_shadow.gp" />
     <None Include="resources\vshader.vp" />
     <None Include="resources\vshader_earth.vp" />
     <None Include="resources\vshader_meteor.vp" />
@@ -153,6 +155,7 @@
     <None Include="resources\vshader_poly_meteor.vp" />
     <None Include="resources\vshader_saturn.vp" />
     <None Include="resources\vshader_saturn_ring.vp" />
+    <None Include="resources\vshader_shadow.vp" />
     <None Include="resources\vshader_skybox.vp" />
     <None Include="resources\vshader_sun.vp" />
   </ItemGroup>

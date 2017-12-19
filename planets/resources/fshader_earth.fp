@@ -6,6 +6,7 @@
 # define AMPLITUDE 1.0
 # define FREQUENCY 1.0
 # define NUM_LAYERS 5
+# define OFFSET_SIZE 27
 
 out vec4 FragColor;
 
@@ -22,6 +23,21 @@ uniform vec3 viewPos;
 uniform vec3 planetCol;
 uniform int p[SIZE];
 uniform float r[GRID];
+uniform samplerCube shadow_texture;
+uniform float far_plane;
+
+ vec3 sampleOffsetDirections[OFFSET_SIZE] = vec3[]
+(
+   vec3(1,  1,  1), vec3(1, 1,  0), vec3(1, 1,  -1), 
+   vec3(1,  0,  1), vec3(1,  0,  0), vec3(1,  0,  -1), 
+   vec3(1,  -1,  1), vec3(1,  -1, 0), vec3(1,  -1,  -1),
+   vec3( 0,  1,  1), vec3(0, 1,  0), vec3(0, 1,  -1), 
+   vec3(0,  0,  1), vec3(0,  0,  0), vec3(0,  0,  -1), 
+   vec3(0,  -1,  1), vec3(0,  -1, 0), vec3(0,  -1,  -1),
+   vec3(-1,  1,  1), vec3(-1, 1,  0), vec3(-1, 1,  -1), 
+   vec3(-1,  0,  1), vec3(-1,  0,  0), vec3(-1,  0,  -1), 
+   vec3(-1,  -1,  1), vec3(-1,  -1, 0), vec3(-1,  -1,  -1)
+);   
 
 float noise(float in_x, float in_y, float in_z)
 {
@@ -68,7 +84,7 @@ float noise(float in_x, float in_y, float in_z)
 }
 
  
-// Directional Light
+// Point Light
 vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
 {	
     vec3 norm = normalize(normal);
@@ -80,8 +96,23 @@ vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
 
 	// ambient
 	vec3 ambient_obj = obj_col * ambient;
-          
-	return ambient_obj + diffuse_obj; 
+
+	// shadow
+	float currentDepth = length(direct);
+    float bias = 0.05f;
+	float shadow = 0.0f;
+	float offset = 0.01f;
+	float closestDepth;
+	for(int i = 0; i < OFFSET_SIZE; ++i)
+	{
+		closestDepth = texture(shadow_texture, Direction + sampleOffsetDirections[i] * offset).r;
+		closestDepth *= far_plane;
+		shadow += currentDepth - bias > closestDepth ? 1.0f : 0.0f;
+	}    
+
+	shadow /= OFFSET_SIZE;
+
+	return ambient_obj + (1.0f - shadow) * diffuse_obj; 
 }
 
 void main()
@@ -103,5 +134,5 @@ void main()
 	vec3 light = vec3(0.0f);
 	light += DirectionalLight(Direction, Normal, planetCol);
 
-	gl_FragColor = vec4(light, 1.0) * (frac_noise * vec4(0.0f, 1.0f, 0.0f, 1.0) + vec4(planetCol, 1.0)); 
+	gl_FragColor = vec4(light, 1.0) * (frac_noise * vec4(0.0f, 1.0f, 0.0f, 1.0) + vec4(planetCol, 1.0f)); 
 }

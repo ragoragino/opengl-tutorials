@@ -5,3 +5,11 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#define _USE_MATH_DEFINES
+#include "math.h"
+
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <iostream>

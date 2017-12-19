@@ -121,5 +121,14 @@
     <None Include="resources\vshader_poly_meteor.vp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="resources\fshader_shadow.fp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\vshader_shadow.vp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\gshader_shadow.gp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

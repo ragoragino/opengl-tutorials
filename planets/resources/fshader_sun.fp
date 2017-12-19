@@ -63,10 +63,10 @@ float noise(float in_x, float in_y, float in_z)
 void main()
 {
 	float frac_noise = 0.0f;
-	float ampl = 0.5f;
-	float freq = 2.0f;
+	float ampl = 0.6f;
+	float freq = 0.1f;
 	float ampl_mult = 0.5f;
-	float freq_mult = 2.0f;
+	float freq_mult = 0.2f;
 	vec3 frac_vec = VerCoords * freq;
 	for(int i = 0; i != 5; ++i)
 	{
@@ -75,21 +75,21 @@ void main()
 		freq *= freq_mult;
 		frac_vec *= freq;
 	}
-	/*
+	
 	float blot = 0.0f;
-	ampl = 0.5f;
-	freq = 0.02f;
+	ampl = 1.0f;
+	freq = 0.1f;
 	ampl_mult = 0.35f;
-	freq_mult = 0.5f;
+	freq_mult = 0.8f;
 	frac_vec = VerCoords * freq;
 	for(int i = 0; i != 5; ++i)
 	{
 		blot += noise(frac_vec.x, frac_vec.y, frac_vec.z) * ampl;
 		ampl *= ampl_mult;
 		freq *= freq_mult;
-		frac_vec *= freq;
+		frac_vec = VerCoords * freq;
 	}
-	*/
-	gl_FragColor = clamp(1 - frac_noise, 0.0f, 1.0f) * vec4(planetCol, 1.0); 
+	
+	gl_FragColor = vec4(frac_noise * planetCol, 1.0) + vec4(1.0f, 0.0f, 0.0f, 0.0f) * blot; 
 }
 

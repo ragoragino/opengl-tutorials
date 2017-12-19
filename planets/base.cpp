@@ -1,8 +1,6 @@
-#define _USE_MATH_DEFINES 
-#include "math.h"
+#include "Header.h"
 #include "Camera.h"
 #include "Shader.h"
-#include "Header.h"
 #include "sphere.h"
 #include "Noise.h"
 // #include "Perlin.h"
@@ -11,22 +9,24 @@
 #include "Skybox.h"
 #include "Square.h"
 #include "Meteor.h"
+#include "Planet.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include <iostream>
-
-Camera camera(glm::vec3(0.0f, 0.0f, -22.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
+Camera camera(glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
 float lastX = 400, lastY = 300;
 bool firstMouse = true;
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
+uint32_t Planet::len; // declare a static Planet member len
+uint32_t screen_width = 1200, screen_height = 800;
+uint32_t screen_pos_x = 500, screen_pos_y = 200;
 
+void processInput(GLFWwindow *window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 int main()
 {
@@ -34,16 +34,15 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	// glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-	GLFWwindow* window = glfwCreateWindow(1200, 800, "LearnOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(screen_width, screen_height, "LearnOpenGL", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
-	glfwSetWindowPos(window, 400, 100);
+	glfwSetWindowPos(window, screen_pos_x, screen_pos_y);
 
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // register resizing of window
@@ -78,18 +77,33 @@ int main()
 	Shader skybox_shader = Shader("D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\vshader_skybox.vp",
 		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_skybox.fp");
 
-	init_buffers(); // Initialize noise buffers for sun
+	Shader shadow_shader = Shader("D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\vshader_shadow.vp",
+		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_shadow.fp",
+		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\gshader_shadow.gp");
 
-	const unsigned int len = 100; // grid structure of sphere
-	const unsigned int len_meteor = 10;
-	const unsigned int size = 6 * len * len * 18; // number of points in sphere array
-	const unsigned int size_meteor = 6 * len_meteor * len_meteor * 18;
+	// Inefficient to construct and render Sun as a Planet object
+	Planet earth = Planet(earth_distance, earth_speed, earth_scale, earth_color, earth_rotation, 0.0f);
+
+	Planet saturn = Planet(saturn_distance, saturn_speed, saturn_scale, saturn_color, saturn_rotation, saturn_angle);
+
+	Moon earth_moon = Moon(&earth, moon_distance, moon_speed, moon_scale, moon_color, moon_rotation, 0.0f);
+
+	init_buffers(); // Initialize noise buffers
+	
+	const uint32_t len = 100; // grid structure of sphere
+	Planet::len = len; // Assign length to the static Planet member len
+	const uint32_t len_meteor = 10; // grid structureof the meteor
+	const uint32_t size = 6 * len * len * 18; // number of points in sphere array
+	const uint32_t size_meteor = 6 * len_meteor * len_meteor * 18;
 	float * planet = sphere(len);
 	float * ring = square();
 	float * meteor = meteor_f(len_meteor);
 
-	// Planet
-	unsigned int VAO_planet, VBO_planet;
+	/* *********************************************
+	// BUFFERS
+	********************************************* */
+	// PLANET
+	uint32_t VAO_planet, VBO_planet;
 	glGenVertexArrays(1, &VAO_planet);
 	glGenBuffers(1, &VBO_planet);
 	glBindVertexArray(VAO_planet);
@@ -101,7 +115,7 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 	// SATURN RING
-	unsigned int VAO_saturn_ring, VBO_saturn_ring;
+	uint32_t VAO_saturn_ring, VBO_saturn_ring;
 	glGenVertexArrays(1, &VAO_saturn_ring);
 	glGenBuffers(1, &VBO_saturn_ring);
 	glBindVertexArray(VAO_saturn_ring);
@@ -117,7 +131,7 @@ int main()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
 	// METEOR
-	unsigned int VAO_meteor, VBO_meteor;
+	uint32_t VAO_meteor, VBO_meteor;
 	glGenVertexArrays(1, &VAO_meteor);
 	glGenBuffers(1, &VBO_meteor);
 	glBindVertexArray(VAO_meteor);
@@ -130,7 +144,7 @@ int main()
 
 	// METEOR RING
 	glm::mat4 * meteor_rings = InitializeMeteorRing();
-	unsigned int VBO_meteor_ring;
+	uint32_t VBO_meteor_ring;
 	glGenBuffers(1, &VBO_meteor_ring);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_meteor_ring);
 	glBufferData(GL_ARRAY_BUFFER, N_METEORS * sizeof(glm::mat4), glm::value_ptr(*meteor_rings), GL_STATIC_DRAW);
@@ -151,26 +165,26 @@ int main()
 
 	// METEOR RING y OFFSET
 	float * meteor_ring_fluctation = InitializeMeteorRingFlucation(); 
-	int * meteor_order = new int[N_METEORS];
-	for(int i = N_METEORS, j = 0; j < N_METEORS; --i, ++j)
+	uint32_t * meteor_order = new uint32_t[N_METEORS];
+	for(uint32_t i = 0; i < N_METEORS; ++i)
 	{
-		meteor_order[j] = i;
+		meteor_order[i] = i;
 	}
 
-	unsigned int VBO_meteor_ring_fluctuation;
+	uint32_t VBO_meteor_ring_fluctuation;
 	glGenBuffers(1, &VBO_meteor_ring_fluctuation);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_meteor_ring_fluctuation);
-	glBufferData(GL_ARRAY_BUFFER, N_METEORS * sizeof(int), meteor_order, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, N_METEORS * sizeof(uint32_t), meteor_order, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(5);
-	glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(int), (void*)0);
+	glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(uint32_t), (void*)0);
 	glVertexAttribDivisor(5, 1);
 	glEnableVertexAttribArray(0);
 
 	glBindVertexArray(0);
 
 	// SKYBOX
-	unsigned int VAO_skybox, VBO_skybox;
+	uint32_t VAO_skybox, VBO_skybox;
 	glGenVertexArrays(1, &VAO_skybox);
 	glGenBuffers(1, &VBO_skybox);
 	glBindVertexArray(VAO_skybox);
@@ -186,56 +200,97 @@ int main()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
+	/* *********************************************
+	// UNIFORMS
+	********************************************* */
 	// Set the uniform Matrix for vertex shader - contains view and projection matrices
-	unsigned int uniformBlockIndexEarth = glGetUniformBlockIndex(earth_shader.ID, "Matrices");
-	unsigned int uniformBlockIndexSun = glGetUniformBlockIndex(sun_shader.ID, "Matrices");
-	unsigned int uniformBlockIndexMoon = glGetUniformBlockIndex(moon_shader.ID, "Matrices");
+	uint32_t uniformBlockIndexEarth = glGetUniformBlockIndex(earth_shader.ID, "Matrices");
+	uint32_t uniformBlockIndexSun = glGetUniformBlockIndex(sun_shader.ID, "Matrices");
+	uint32_t uniformBlockIndexMoon = glGetUniformBlockIndex(moon_shader.ID, "Matrices");
 
 	glUniformBlockBinding(earth_shader.ID, uniformBlockIndexEarth, 0);
 	glUniformBlockBinding(sun_shader.ID, uniformBlockIndexSun, 0);
 	glUniformBlockBinding(moon_shader.ID, uniformBlockIndexMoon, 0);
 
-	unsigned int uboMatrices;
+	uint32_t uboMatrices;
 	glGenBuffers(1, &uboMatrices);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
 
-	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 800.0f / 600.0f, 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)screen_width / (float)screen_height, 0.1f, 100.0f);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	// Set the uniform DirLight for fragment shader - contains light properties
-	unsigned int uniformBlockIndexSaturn = glGetUniformBlockIndex(saturn_shader.ID, "DirLight");
-	unsigned int uniformBlockIndexMeteor = glGetUniformBlockIndex(meteor_shader.ID, "DirLight");
-	unsigned int uniformBlockIndexEarth2 = glGetUniformBlockIndex(earth_shader.ID, "DirLight");
+	uint32_t uniformBlockIndexSaturn = glGetUniformBlockIndex(saturn_shader.ID, "DirLight");
+	uint32_t uniformBlockIndexMeteor = glGetUniformBlockIndex(meteor_shader.ID, "DirLight");
+	uint32_t uniformBlockIndexEarth2 = glGetUniformBlockIndex(earth_shader.ID, "DirLight");
+	uint32_t uniformBlockIndexMoon2 = glGetUniformBlockIndex(moon_shader.ID, "DirLight");
 
 	glUniformBlockBinding(saturn_shader.ID, uniformBlockIndexSaturn, 1);
 	glUniformBlockBinding(meteor_shader.ID, uniformBlockIndexMeteor, 1);
 	glUniformBlockBinding(earth_shader.ID, uniformBlockIndexEarth2, 1);
+	glUniformBlockBinding(moon_shader.ID, uniformBlockIndexMoon2, 1);
 
-	unsigned int uboDirLight;
+	uint32_t uboDirLight;
 	glGenBuffers(1, &uboDirLight);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, uboDirLight);
 	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::vec4), NULL, GL_STATIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 1);
 	glBindBufferRange(GL_UNIFORM_BUFFER, 1, uboDirLight, 0, 2 * sizeof(glm::vec4));
 
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), glm::value_ptr(sunlight_ambient));
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), sizeof(glm::vec4), glm::value_ptr(sunlight_diffuse));
-	glBindBuffer(GL_UNIFORM_BUFFER, 1);
+	
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	// Set noise for Sun texture
+	/* *********************************************
+	// SHADOWS
+	********************************************* */
+	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	unsigned int shadow_buffer;
+	glGenFramebuffers(1, &shadow_buffer);
+
+	unsigned int shadow_texture;
+	glGenTextures(1, &shadow_texture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, shadow_texture);
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, shadow_buffer);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_texture, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	float near_plane = 1.0f;
+	float far_plane = 50.0f;
+	glm::mat4 shadowProj = glm::perspective((float)M_PI * 0.5f, (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
+	glm::mat4 shadowTransforms[6];
+	shadowTransforms[0] = shadowProj * glm::lookAt(sun_pos, sun_pos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	shadowTransforms[1] = shadowProj * glm::lookAt(sun_pos, sun_pos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	shadowTransforms[2] = shadowProj * glm::lookAt(sun_pos, sun_pos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	shadowTransforms[3] = shadowProj * glm::lookAt(sun_pos, sun_pos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+	shadowTransforms[4] = shadowProj * glm::lookAt(sun_pos, sun_pos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	shadowTransforms[5] = shadowProj * glm::lookAt(sun_pos, sun_pos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+
+	/* *********************************************
+	// SHADERS
+	********************************************* */
 	sun_shader.use();
 	sun_shader.set("p", SIZE, p);
 	sun_shader.set("r", GRID, r);
 	sun_shader.set("planetCol", sun_color);
 
-	// Set noise for Skybox texture
 	skybox_shader.use();
 	skybox_shader.set("p", SIZE, p);
 	skybox_shader.set("r", GRID, r);
@@ -244,11 +299,15 @@ int main()
 
 	moon_shader.use();
 	moon_shader.set("planetCol", moon_color);
+	moon_shader.set("shadow_texture", 0);
+	moon_shader.set("far_plane", far_plane);
 
 	earth_shader.use();
 	earth_shader.set("planetCol", earth_color);
 	earth_shader.set("p", SIZE, p); // GRID instead of SIZE -> only 1D Perlin
 	earth_shader.set("r", GRID, r);
+	earth_shader.set("shadow_texture", 0);
+	earth_shader.set("far_plane", far_plane);
 
 	saturn_shader.use(); // TODO 512
 	saturn_shader.set("p", 512, p); // GRID instead of SIZE -> only 1D Perlin
@@ -265,7 +324,11 @@ int main()
 	meteor_shader.set("r", GRID, r);
 	meteor_shader.set("planetCol", meteor_color);
 	meteor_shader.set("offset", N_METEORS, meteor_ring_fluctation);
-	int meteor_counter = 0;
+	uint32_t meteor_counter = 0;
+
+	shadow_shader.use();
+	shadow_shader.set("shadowMatrices", 6, shadowTransforms);
+	shadow_shader.set("far_plane", far_plane);
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
@@ -275,21 +338,50 @@ int main()
 	{
 		processInput(window);
 
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
-		
 		glEnable(GL_DEPTH_TEST);
 
+		float currentFrame = (float)glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		/* *********************************************
+		// FILLING SHADOW BUFFER
+		********************************************* */
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+		glBindFramebuffer(GL_FRAMEBUFFER, shadow_buffer);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		
+		// Face culling
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+		glFrontFace(GL_CCW);
+
+		// EARTH RENDERING
+		glBindVertexArray(VAO_planet);
+		earth.render(shadow_shader, currentFrame, camera);
+
+		// MOON RENDERING
+		earth_moon.render(shadow_shader, currentFrame, camera);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glDisable(GL_CULL_FACE);
+
+		/* *********************************************
+		// SCENE RENDERING
+		********************************************* */
+
+		glViewport(0, 0, screen_width, screen_height);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		glm::mat4 view = camera.GetViewMatrix();
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		
+
 		// SKYBOX RENDERING
 		glDepthMask(GL_FALSE);
 
@@ -301,71 +393,32 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glDepthMask(GL_TRUE);
-		
-		// EARTH RENDERING
+	
+		// Face culling
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		glFrontFace(GL_CCW);
 
+		// EARTH RENDERING
 		glBindVertexArray(VAO_planet);
-
-		earth_shader.use(); 
-
-		float earth_x = earth_distance * glm::sin(earth_dispos * currentFrame);
-		float earth_z = -earth_distance * glm::cos(earth_dispos * currentFrame);
-
-		glm::mat4 model_earth = glm::translate(glm::mat4(), glm::vec3(earth_x, 0.0f, earth_z));
-		model_earth = glm::scale(model_earth, earth_scale);
-		model_earth = glm::rotate(model_earth, (float)(- 2.0f * M_PI * currentFrame / earth_rotation), glm::vec3(0.0f, 1.0f, 0.0f)); // Axis rotation
-
-		earth_shader.set("model", model_earth);
-		earth_shader.set("viewPos", camera.Position);
-		
-		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, shadow_texture);
+		earth.render(earth_shader, currentFrame, camera);
 	
 		// SUN RENDERING
 		sun_shader.use();
 
 		// Sun is always in the centre - no translation needed
 		glm::mat4 model_sun = glm::scale(glm::mat4(), sun_scale);
-
 		sun_shader.set("model", model_sun);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
 		
 		// MOON RENDERING
-		moon_shader.use();
+		earth_moon.render(moon_shader, currentFrame, camera);
 
-		float moon_z = glm::sin(moon_dispos * currentFrame) * moon_distance + earth_z;
-		float moon_x = glm::cos(moon_dispos * currentFrame) * moon_distance + earth_x;
-
-		glm::mat4 model_moon = glm::translate(glm::mat4(1.0f), glm::vec3(moon_x, 0.0f, moon_z));
-		model_moon = glm::scale(model_moon, moon_scale);
-
-		moon_shader.set("model", model_moon);
-
-		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
-
-		// SATURN RENDERING
-		saturn_shader.use();
-
-		float saturn_x = saturn_distance * glm::sin(saturn_dispos * currentFrame);
-		float saturn_z = -saturn_distance * glm::cos(saturn_dispos * currentFrame);
-
-		// Get the vector on which to rotate Saturn
-		glm::vec3 saturn_rotate = glm::cross(glm::vec3(saturn_x, 0.0f, saturn_z), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		glm::mat4 model_saturn = glm::translate(glm::mat4(), glm::vec3(saturn_x, 0.0f, saturn_z));
-		model_saturn = glm::rotate(model_saturn, glm::radians(saturn_angle), saturn_rotate);
-		model_saturn = glm::scale(model_saturn, saturn_scale);
-
-		// Keep Saturn always rotated towards the Sun
-		model_saturn = glm::rotate(model_saturn, (float)(-2.0f * M_PI * currentFrame / saturn_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		saturn_shader.set("model", model_saturn);
-		saturn_shader.set("viewPos", camera.Position); 
-
-		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
+		// SATURN RENDERING 
+		saturn.render(saturn_shader, currentFrame, camera);
 
 		// METEOR RENDERING
 		glBindVertexArray(VAO_meteor);
@@ -392,8 +445,8 @@ int main()
 
 		saturn_ring_shader.use();
 
-		glm::mat4 model_saturn_ring = glm::translate(glm::mat4(), glm::vec3(saturn_x, 0.0f, saturn_z));
-		model_saturn_ring = glm::rotate(model_saturn_ring, glm::radians(saturn_angle), saturn_rotate);
+		glm::mat4 model_saturn_ring = glm::translate(glm::mat4(), glm::vec3(saturn.x, 0.0f, saturn.z));
+		model_saturn_ring = glm::rotate(model_saturn_ring, glm::radians(saturn_angle), saturn.rotate_vec);
 		model_saturn_ring = glm::scale(model_saturn_ring, saturn_ring_scale);
 
 		saturn_ring_shader.set("model", model_saturn_ring);
@@ -401,10 +454,9 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glDisable(GL_BLEND);
+	
+		glBindVertexArray(0);
 
-		// EARTH POLYGONS RENDERING
-		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -450,16 +502,16 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	if (firstMouse)
 	{
-		lastX = xpos;
-		lastY = ypos;
+		lastX = (float)xpos;
+		lastY = (float)ypos;
 		firstMouse = false;
 	}
 
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+	float xoffset = (float)xpos - lastX;
+	float yoffset = lastY - (float)ypos; // reversed since y-coordinates go from bottom to top
 
-	lastX = xpos;
-	lastY = ypos;
+	lastX = (float)xpos;
+	lastY = (float)ypos;
 
 	camera.ProcessMouseMovement(xoffset, yoffset);
 }
@@ -468,7 +520,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	camera.ProcessMouseScroll(yoffset);
+	camera.ProcessMouseScroll((float)yoffset);
 }
 
 unsigned int loadTexture(std::string filename, bool flip)

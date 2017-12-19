@@ -10,6 +10,7 @@
 out vec4 FragColor;
 
 in vec3 VerCoords;
+in vec4 ModelCoords;
 
 uniform int p[SIZE];
 uniform float r[GRID];
