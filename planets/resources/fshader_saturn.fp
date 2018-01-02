@@ -6,6 +6,7 @@
 # define AMPLITUDE 1.0
 # define FREQUENCY 1.0
 # define NUM_LAYERS 5
+# define OFFSET_SIZE 27
 
 out vec4 FragColor;
 
@@ -23,7 +24,6 @@ uniform vec3 viewPos;
 uniform vec3 planetCol;
 uniform int p[SIZE];
 uniform float r[GRID];
-
 
 float noise(float in_x, float in_y)
 {
@@ -67,7 +67,7 @@ vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
 
 	// ambient
 	vec3 ambient_obj = obj_col * ambient;
-          
+
 	return ambient_obj + diffuse_obj; 
 }
 

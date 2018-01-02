@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\Materials\Programming\C++\Libraries\Glad;D:\Materials\Programming\C++\Libraries\glm\;D:\Materials\Programming\C++\Libraries\GLFW\glfw-3.2.1.bin.WIN32\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\Materials\Programming\C++\Libraries\GLFW\glfw-3.2.1.bin.WIN32\lib-vc2015;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Materials\Programming\C++\Libraries\FreeImage\Dist\x32;D:\Materials\Programming\C++\Libraries\Glad;D:\Materials\Programming\C++\Libraries\glm\;D:\Materials\Programming\C++\Libraries\GLFW\glfw-3.2.1.bin.WIN32\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Materials\Programming\C++\Libraries\FreeImage\Dist\x32;D:\Materials\Programming\C++\Libraries\GLFW\glfw-3.2.1.bin.WIN32\lib-vc2015;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -80,7 +80,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -121,9 +121,13 @@
     <ClCompile Include="glad.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Callbacks.h" />
+    <ClInclude Include="Globals.h" />
     <ClInclude Include="Meteor.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Planet.h" />
+    <ClInclude Include="Shadow.h" />
+    <ClInclude Include="Snapshot.h" />
     <ClInclude Include="Square.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="Perlin.h" />
@@ -132,11 +136,8 @@
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Solar.h" />
     <ClInclude Include="sphere.h" />
-    <ClInclude Include="stb_image.h" />
-    <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\fshader.fp" />
     <None Include="resources\fshader_earth.fp" />
     <None Include="resources\fshader_meteor.fp" />
     <None Include="resources\fshader_moon.fp" />
@@ -148,10 +149,10 @@
     <None Include="resources\fshader_sun.fp" />
     <None Include="resources\fshader_sun_perlin.fp" />
     <None Include="resources\gshader_shadow.gp" />
-    <None Include="resources\vshader.vp" />
     <None Include="resources\vshader_earth.vp" />
     <None Include="resources\vshader_meteor.vp" />
     <None Include="resources\vshader_moon.vp" />
+    <None Include="resources\vshader_moon_shadow.vp" />
     <None Include="resources\vshader_poly_meteor.vp" />
     <None Include="resources\vshader_saturn.vp" />
     <None Include="resources\vshader_saturn_ring.vp" />

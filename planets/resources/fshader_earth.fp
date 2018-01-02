@@ -1,11 +1,6 @@
 #version 330 core
 # define SIZE 768
 # define GRID 256
-# define AMPLITUDE_MULT 0.5
-# define FREQUENCY_MULT 2.0
-# define AMPLITUDE 1.0
-# define FREQUENCY 1.0
-# define NUM_LAYERS 5
 # define OFFSET_SIZE 27
 
 out vec4 FragColor;
@@ -19,25 +14,13 @@ layout (std140) uniform DirLight
 in vec3 VerCoords;
 in vec3 Normal;
 in vec3 Direction;
+
 uniform vec3 viewPos;
-uniform vec3 planetCol;
 uniform int p[SIZE];
 uniform float r[GRID];
+uniform vec3 sampleOffsetDirections[OFFSET_SIZE];
 uniform samplerCube shadow_texture;
 uniform float far_plane;
-
- vec3 sampleOffsetDirections[OFFSET_SIZE] = vec3[]
-(
-   vec3(1,  1,  1), vec3(1, 1,  0), vec3(1, 1,  -1), 
-   vec3(1,  0,  1), vec3(1,  0,  0), vec3(1,  0,  -1), 
-   vec3(1,  -1,  1), vec3(1,  -1, 0), vec3(1,  -1,  -1),
-   vec3( 0,  1,  1), vec3(0, 1,  0), vec3(0, 1,  -1), 
-   vec3(0,  0,  1), vec3(0,  0,  0), vec3(0,  0,  -1), 
-   vec3(0,  -1,  1), vec3(0,  -1, 0), vec3(0,  -1,  -1),
-   vec3(-1,  1,  1), vec3(-1, 1,  0), vec3(-1, 1,  -1), 
-   vec3(-1,  0,  1), vec3(-1,  0,  0), vec3(-1,  0,  -1), 
-   vec3(-1,  -1,  1), vec3(-1,  -1, 0), vec3(-1,  -1,  -1)
-);   
 
 float noise(float in_x, float in_y, float in_z)
 {
@@ -88,7 +71,7 @@ float noise(float in_x, float in_y, float in_z)
 vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
 {	
     vec3 norm = normalize(normal);
-	vec3 lightDir = normalize(-direct);
+	vec3 lightDir = normalize(-Direction);
 
 	// diffuse 
 	float diff = max(dot(norm, lightDir), 0.0);
@@ -118,8 +101,8 @@ vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
 void main()
 {
 	float frac_noise = 0.0f;
-	float ampl = 1.0f;
-	float freq = 0.05f;
+	float ampl = 0.6f;
+	float freq = 0.01f;
 	float ampl_mult = 0.5f;
 	float freq_mult = 0.1f;
 	vec3 frac_vec = VerCoords * freq;
@@ -130,9 +113,30 @@ void main()
 		freq *= freq_mult;
 		frac_vec *= freq;
 	}
+
+	float clouds = 0.0f;
+	ampl = 0.4f;
+	freq = 0.03f;
+	ampl_mult = 0.2f;
+	freq_mult = 0.1f;
+	frac_vec = VerCoords * freq;
+	for(int i = 0; i != 5; ++i)
+	{
+		clouds += noise(frac_vec.x, frac_vec.y, frac_vec.z) * ampl;
+		ampl *= ampl_mult;
+		freq *= freq_mult;
+		frac_vec *= freq;
+	}
 	
 	vec3 light = vec3(0.0f);
-	light += DirectionalLight(Direction, Normal, planetCol);
 
-	gl_FragColor = vec4(light, 1.0) * (frac_noise * vec4(0.0f, 1.0f, 0.0f, 1.0) + vec4(planetCol, 1.0f)); 
+	// Mix green and blue
+	vec3 EarthColor = mix(vec3(0.0, 1.0, 0.0), vec3(0.1, 0.1, 1.0), clamp(frac_noise, 0.0, 1.0));
+		
+	// Add white clouds to the atmosphere
+	EarthColor = mix(EarthColor, vec3(1.0), clamp(clouds, 0.0, 1.0));
+
+	light += DirectionalLight(Direction, Normal, EarthColor);
+
+	gl_FragColor = vec4(light, 1.0);
 }

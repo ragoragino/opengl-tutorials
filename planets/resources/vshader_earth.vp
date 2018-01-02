@@ -16,6 +16,7 @@ void main()
 {
 	VerCoords = aPos;
 	Normal = transpose(inverse(mat3(model))) * aPos;
-	Direction = vec3(model * vec4(aPos, 1.0));
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+	vec4 modelPos = model * vec4(aPos, 1.0);
+	Direction = vec3(modelPos);
+    gl_Position = projection * view * modelPos;
 }

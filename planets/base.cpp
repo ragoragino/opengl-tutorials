@@ -3,30 +3,18 @@
 #include "Shader.h"
 #include "sphere.h"
 #include "Noise.h"
-// #include "Perlin.h"
 #include "Solar.h"
-// #include "Texture.h"
 #include "Skybox.h"
 #include "Square.h"
 #include "Meteor.h"
 #include "Planet.h"
+#include "Snapshot.h"
+#include "Shadow.h"
+#include "Callbacks.h"
+#include "Globals.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-
-Camera camera(glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
-float lastX = 400, lastY = 300;
-bool firstMouse = true;
-float deltaTime = 0.0f;	// time between current frame and last frame
-float lastFrame = 0.0f;
-uint32_t Planet::len; // declare a static Planet member len
-uint32_t screen_width = 1200, screen_height = 800;
-uint32_t screen_pos_x = 500, screen_pos_y = 200;
-
-void processInput(GLFWwindow *window);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 int main()
 {
@@ -34,6 +22,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	GLFWwindow* window = glfwCreateWindow(screen_width, screen_height, "LearnOpenGL", NULL, NULL);
 	if (window == NULL)
@@ -45,7 +34,10 @@ int main()
 	glfwSetWindowPos(window, screen_pos_x, screen_pos_y);
 
 	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // register resizing of window
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -81,23 +73,26 @@ int main()
 		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_shadow.fp",
 		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\gshader_shadow.gp");
 
-	// Inefficient to construct and render Sun as a Planet object
-	Planet earth = Planet(earth_distance, earth_speed, earth_scale, earth_color, earth_rotation, 0.0f);
+	Shader shadow_moon_shader = Shader("D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\vshader_moon_shadow.vp",
+		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_shadow.fp",
+		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\gshader_shadow.gp");
 
-	Planet saturn = Planet(saturn_distance, saturn_speed, saturn_scale, saturn_color, saturn_rotation, saturn_angle);
-
-	Moon earth_moon = Moon(&earth, moon_distance, moon_speed, moon_scale, moon_color, moon_rotation, 0.0f);
-
-	init_buffers(); // Initialize noise buffers
-	
 	const uint32_t len = 100; // grid structure of sphere
-	Planet::len = len; // Assign length to the static Planet member len
 	const uint32_t len_meteor = 10; // grid structureof the meteor
 	const uint32_t size = 6 * len * len * 18; // number of points in sphere array
 	const uint32_t size_meteor = 6 * len_meteor * len_meteor * 18;
 	float * planet = sphere(len);
 	float * ring = square();
 	float * meteor = meteor_f(len_meteor);
+
+	// Inefficient to construct and render Sun as a Planet object
+	Planet earth = Planet(earth_distance, earth_speed, earth_scale, earth_color, earth_rotation, 0.0f, len);
+
+	Planet saturn = Planet(saturn_distance, saturn_speed, saturn_scale, saturn_color, saturn_rotation, saturn_angle, len);
+
+	Moon earth_moon = Moon(&earth, moon_distance, moon_speed, moon_scale, moon_color, moon_rotation, 0.0f, len);
+
+	init_buffers(); // Initialize noise buffers
 
 	/* *********************************************
 	// BUFFERS
@@ -142,7 +137,7 @@ int main()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-	// METEOR RING
+	// METEOR RING -> matrix to offset meteors
 	glm::mat4 * meteor_rings = InitializeMeteorRing();
 	uint32_t VBO_meteor_ring;
 	glGenBuffers(1, &VBO_meteor_ring);
@@ -163,7 +158,7 @@ int main()
 	glVertexAttribDivisor(3, 1);
 	glVertexAttribDivisor(4, 1);
 
-	// METEOR RING y OFFSET
+	// METEOR RING y OFFSET -> indexing numbers to allow for fluctuation of meteors
 	float * meteor_ring_fluctation = InitializeMeteorRingFlucation(); 
 	uint32_t * meteor_order = new uint32_t[N_METEORS];
 	for(uint32_t i = 0; i < N_METEORS; ++i)
@@ -228,11 +223,13 @@ int main()
 	uint32_t uniformBlockIndexMeteor = glGetUniformBlockIndex(meteor_shader.ID, "DirLight");
 	uint32_t uniformBlockIndexEarth2 = glGetUniformBlockIndex(earth_shader.ID, "DirLight");
 	uint32_t uniformBlockIndexMoon2 = glGetUniformBlockIndex(moon_shader.ID, "DirLight");
+	uint32_t uniformBlockIndexSaturnRing = glGetUniformBlockIndex(saturn_ring_shader.ID, "DirLight");
 
 	glUniformBlockBinding(saturn_shader.ID, uniformBlockIndexSaturn, 1);
 	glUniformBlockBinding(meteor_shader.ID, uniformBlockIndexMeteor, 1);
 	glUniformBlockBinding(earth_shader.ID, uniformBlockIndexEarth2, 1);
 	glUniformBlockBinding(moon_shader.ID, uniformBlockIndexMoon2, 1);
+	glUniformBlockBinding(saturn_ring_shader.ID, uniformBlockIndexSaturnRing, 1);
 
 	uint32_t uboDirLight;
 	glGenBuffers(1, &uboDirLight);
@@ -301,16 +298,20 @@ int main()
 	moon_shader.set("planetCol", moon_color);
 	moon_shader.set("shadow_texture", 0);
 	moon_shader.set("far_plane", far_plane);
+	moon_shader.set("p", SIZE, p); // GRID instead of SIZE -> only 1D Perlin
+	moon_shader.set("r", GRID, r);
+	moon_shader.set("sampleOffsetDirections", OFFSET_SIZE, ShadowOffsetDirections);
 
 	earth_shader.use();
 	earth_shader.set("planetCol", earth_color);
-	earth_shader.set("p", SIZE, p); // GRID instead of SIZE -> only 1D Perlin
+	earth_shader.set("p", SIZE, p);
 	earth_shader.set("r", GRID, r);
 	earth_shader.set("shadow_texture", 0);
 	earth_shader.set("far_plane", far_plane);
+	earth_shader.set("sampleOffsetDirections", OFFSET_SIZE, ShadowOffsetDirections);
 
 	saturn_shader.use(); // TODO 512
-	saturn_shader.set("p", 512, p); // GRID instead of SIZE -> only 1D Perlin
+	saturn_shader.set("p", 2 * GRID, p); // GRID instead of SIZE -> only 1D Perlin
 	saturn_shader.set("r", GRID, r);
 	saturn_shader.set("planetCol", saturn_color);
 
@@ -318,6 +319,9 @@ int main()
 	saturn_ring_shader.set("p", GRID, p); // GRID instead of SIZE -> only 1D Perlin
 	saturn_ring_shader.set("r", GRID, r);
 	saturn_ring_shader.set("planetCol", saturn_ring_color);
+	saturn_ring_shader.set("shadow_texture", 0);
+	saturn_ring_shader.set("far_plane", far_plane);
+	saturn_ring_shader.set("sampleOffsetDirections", OFFSET_SIZE, ShadowOffsetDirections);
 
 	meteor_shader.use();
 	meteor_shader.set("p", GRID, p); // GRID instead of SIZE -> only 1D Perlin
@@ -330,9 +334,13 @@ int main()
 	shadow_shader.set("shadowMatrices", 6, shadowTransforms);
 	shadow_shader.set("far_plane", far_plane);
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
+	shadow_moon_shader.use();
+	shadow_moon_shader.set("shadowMatrices", 6, shadowTransforms);
+	shadow_moon_shader.set("far_plane", far_plane);
+	shadow_moon_shader.set("p", SIZE, p);
+	shadow_moon_shader.set("r", GRID, r);
+	
+	glEnable(GL_MULTISAMPLE);
 	
 	while (!glfwWindowShouldClose(window)) // render loop
 	{
@@ -364,7 +372,12 @@ int main()
 		earth.render(shadow_shader, currentFrame, camera);
 
 		// MOON RENDERING
-		earth_moon.render(shadow_shader, currentFrame, camera);
+		shadow_moon_shader.use();
+		shadow_moon_shader.set("CentreCoords", glm::vec3(earth_moon.x, 0.0f, earth_moon.z));
+		earth_moon.render(shadow_moon_shader, currentFrame, camera);
+
+		// SATURN RENDERING
+		saturn.render(shadow_shader, currentFrame, camera);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -411,10 +424,13 @@ int main()
 		// Sun is always in the centre - no translation needed
 		glm::mat4 model_sun = glm::scale(glm::mat4(), sun_scale);
 		sun_shader.set("model", model_sun);
+		sun_shader.set("time", currentFrame);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
 		
 		// MOON RENDERING
+		moon_shader.use();
+		moon_shader.set("CentreCoords", glm::vec3(earth_moon.x, 0.0f, earth_moon.z)); // set coords of the centre of Moon
 		earth_moon.render(moon_shader, currentFrame, camera);
 
 		// SATURN RENDERING 
@@ -470,95 +486,4 @@ int main()
 	glfwTerminate();
 
 	return 0;
-}
-
-void processInput(GLFWwindow *window)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera.ProcessKeyboard(FORWARD, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera.ProcessKeyboard(BACKWARD, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera.ProcessKeyboard(LEFT, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera.ProcessKeyboard(RIGHT, deltaTime);
-}
-
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-	// make sure the viewport matches the new window dimensions; note that width and 
-	// height will be significantly larger than specified on retina displays.
-	glViewport(0, 0, width, height);
-}
-
-
-// glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-	if (firstMouse)
-	{
-		lastX = (float)xpos;
-		lastY = (float)ypos;
-		firstMouse = false;
-	}
-
-	float xoffset = (float)xpos - lastX;
-	float yoffset = lastY - (float)ypos; // reversed since y-coordinates go from bottom to top
-
-	lastX = (float)xpos;
-	lastY = (float)ypos;
-
-	camera.ProcessMouseMovement(xoffset, yoffset);
-}
-
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-	camera.ProcessMouseScroll((float)yoffset);
-}
-
-unsigned int loadTexture(std::string filename, bool flip)
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-
-	int width, height, nrComponents;
-	stbi_set_flip_vertically_on_load(flip);
-	unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-	if (data)
-	{
-		GLenum format;
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
-
-		std::cout << nrComponents << std::endl;
-
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		stbi_image_free(data);
-	}
-	else
-	{
-		std::cout << "Texture failed to load at path: " << filename << std::endl;
-		stbi_image_free(data);
-	}
-
-	return textureID;
 }

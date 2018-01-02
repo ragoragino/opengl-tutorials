@@ -1,6 +1,4 @@
 #pragma once
-#define _USE_MATH_DEFINES 
-#include "math.h"
 #include "Header.h"
 
 float * sphere(int n, float size = 2.0f)

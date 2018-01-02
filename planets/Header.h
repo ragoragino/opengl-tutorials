@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -13,3 +15,4 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <vector>

@@ -1,6 +1,5 @@
 #pragma once
-#define _USE_MATH_DEFINES 
-#include "math.h"
+#include "Header.h"
 
 float * square(float size = 2.0f)
 {

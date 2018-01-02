@@ -32,9 +32,6 @@
     <ClInclude Include="Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="sphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -45,9 +42,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Solar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Skybox.h">
@@ -62,14 +56,20 @@
     <ClInclude Include="Planet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Snapshot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shadow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Callbacks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\fshader.fp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resources\vshader.vp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="resources\fshader_earth.fp">
       <Filter>Resource Files</Filter>
     </None>
@@ -128,6 +128,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resources\gshader_shadow.gp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\vshader_moon_shadow.vp">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

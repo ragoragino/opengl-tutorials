@@ -1,10 +1,7 @@
 # pragma once
-# include <random>
 # include "Header.h"
 # define SIZE 768
 # define GRID 256
-
-#include <iostream>
 
 /*
 Arrays and initializer for a Perlin noise function.

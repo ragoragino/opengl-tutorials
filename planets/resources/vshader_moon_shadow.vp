@@ -1,19 +1,12 @@
 #version 330 core
-# define SIZE 768
-# define GRID 256
-# define AMPLITUDE_MULT 0.5
-# define FREQUENCY_MULT 2.0
-# define AMPLITUDE 1.0
-# define FREQUENCY 1.0
-# define NUM_LAYERS 5
+#define SIZE 768
+#define GRID 256
+layout (location = 0) in vec3 aPos;
 
-out vec4 FragColor;
-
-in vec3 VerCoords;
-in vec4 ModelCoords;
-
+uniform mat4 model;
 uniform int p[SIZE];
 uniform float r[GRID];
+uniform vec3 CentreCoords;
 
 float noise(float in_x, float in_y, float in_z)
 {
@@ -59,22 +52,27 @@ float noise(float in_x, float in_y, float in_z)
 	return mix(ny0, ny1, sz);
 }
 
+
 void main()
 {
-	float frac_noise = 0.0f;
-	float ampl = 8.0f;
-	float freq = 4.0f;
-	float ampl_mult = 0.1f;
-	float freq_mult = 2.5f;
-	vec3 frac_vec = VerCoords * freq;
+	// Compute the scaling of normal vector
+	float dir = 0.0f;
+	float ampl = 0.4f;
+	float freq = 0.03f;
+	float ampl_mult = 0.2f;
+	float freq_mult = 0.1f;
+	vec3 frac_vec = aPos * freq;
 	for(int i = 0; i != 5; ++i)
 	{
-		frac_noise += noise(frac_vec.x, frac_vec.y, frac_vec.z) * ampl;
+		dir += noise(frac_vec.x, frac_vec.y, frac_vec.z) * ampl;
 		ampl *= ampl_mult;
 		freq *= freq_mult;
 		frac_vec *= freq;
 	}
 
-	gl_FragColor = clamp(1 - frac_noise, 0.0f, 1.0f) * vec4(1.0);
+	// Scale the normal by and set the new position of the vertex
+	dir = dir * 0.4 + 0.6f;
+	vec3 Normal = 0.1 * dir * transpose(inverse(mat3(model))) * aPos;
+	vec3 Direction = CentreCoords + Normal;
+    gl_Position = vec4(Direction, 1.0);
 }
-

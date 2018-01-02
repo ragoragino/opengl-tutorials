@@ -5,7 +5,6 @@
 
 out vec4 FragColor;
 
-in vec3 VerCoords;
 in vec3 Normal;
 in vec3 Direction;
 
@@ -18,19 +17,7 @@ layout (std140) uniform DirLight
 uniform vec3 planetCol;
 uniform samplerCube shadow_texture;
 uniform float far_plane;
-
-vec3 sampleOffsetDirections[OFFSET_SIZE] = vec3[]
-(
-   vec3(1,  1,  1), vec3(1, 1,  0), vec3(1, 1,  -1), 
-   vec3(1,  0,  1), vec3(1,  0,  0), vec3(1,  0,  -1), 
-   vec3(1,  -1,  1), vec3(1,  -1, 0), vec3(1,  -1,  -1),
-   vec3(0,  1,  1), vec3(0, 1,  0), vec3(0, 1,  -1), 
-   vec3(0,  0,  1), vec3(0,  0,  0), vec3(0,  0,  -1), 
-   vec3(0,  -1,  1), vec3(0,  -1, 0), vec3(0,  -1,  -1),
-   vec3(-1,  1,  1), vec3(-1, 1,  0), vec3(-1, 1,  -1), 
-   vec3(-1,  0,  1), vec3(-1,  0,  0), vec3(-1,  0,  -1), 
-   vec3(-1,  -1,  1), vec3(-1,  -1, 0), vec3(-1,  -1,  -1)
-);   
+uniform vec3 sampleOffsetDirections[OFFSET_SIZE];
 
 
 // Point Light

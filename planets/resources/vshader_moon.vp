@@ -1,9 +1,8 @@
 #version 330 core
+#define SIZE 768
+#define GRID 256
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec3 aTextureCoords;
 
-out vec3 VerCoords;
 out vec3 Normal;
 out vec3 Direction;
 
@@ -14,10 +13,74 @@ layout (std140) uniform Matrices
     mat4 view;
 };
 
+uniform int p[SIZE];
+uniform float r[GRID];
+uniform vec3 CentreCoords;
+
+float noise(float in_x, float in_y, float in_z)
+{
+	float x = in_x - int(in_x);
+	float y = in_y - int(in_y);
+	float z = in_z - int(in_z);
+
+	int floor_x = int((x * 0.5f + 0.5f) * GRID);
+	int floor_y = int((y * 0.5f + 0.5f) * GRID);
+	int floor_z = int((z * 0.5f + 0.5f) * GRID);
+
+	float dist_x = (x * 0.5f + 0.5f) * GRID - floor_x;
+	float dist_y = (y * 0.5f + 0.5f) * GRID - floor_y;
+	float dist_z = (z * 0.5f + 0.5f) * GRID - floor_z;
+
+	int rx0 = int(mod(floor_x, GRID));
+	int rx1 = int(mod(rx0 + 1, GRID));
+	int ry0 = int(mod(floor_y, GRID));
+	int ry1 = int(mod(ry0 + 1, GRID));
+	int rz0 = int(mod(floor_z, GRID));
+	int rz1 = int(mod(rz0 + 1, GRID));
+
+	float c000 = r[p[p[p[rx0] + ry0] + rz0]];
+	float c100 = r[p[p[p[rx1] + ry0] + rz0]];
+	float c010 = r[p[p[p[rx0] + ry1] + rz0]];
+	float c110 = r[p[p[p[rx1] + ry1] + rz0]];
+	float c001 = r[p[p[p[rx0] + ry0] + rz1]];
+	float c101 = r[p[p[p[rx1] + ry0] + rz1]];
+	float c011 = r[p[p[p[rx0] + ry1] + rz1]];
+	float c111 = r[p[p[p[rx1] + ry1] + rz1]];
+
+	float sx = smoothstep(0.0f, 1.0f, dist_x);
+	float sy = smoothstep(0.0f, 1.0f, dist_y);
+	float sz = smoothstep(0.0f, 1.0f, dist_z);
+
+	float nx00 = mix(c000, c100, sx);
+	float nx10 = mix(c010, c110, sx);
+	float nx01 = mix(c001, c101, sx);
+	float nx11 = mix(c011, c111, sx);
+	float ny0 = mix(nx00, nx10, sy);
+	float ny1 = mix(nx01, nx11, sy);
+
+	return mix(ny0, ny1, sz);
+}
+
 void main()
 {
-	VerCoords = aPos;
-	Normal = transpose(inverse(mat3(model))) * aPos;
-	Direction = vec3(model * vec4(aPos, 1.0));	
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+	// Compute the scaling of normal vector
+	float dir = 0.0f;
+	float ampl = 0.4f;
+	float freq = 0.03f;
+	float ampl_mult = 0.2f;
+	float freq_mult = 0.1f;
+	vec3 frac_vec = aPos * freq;
+	for(int i = 0; i != 5; ++i)
+	{
+		dir += noise(frac_vec.x, frac_vec.y, frac_vec.z) * ampl;
+		ampl *= ampl_mult;
+		freq *= freq_mult;
+		frac_vec *= freq;
+	}
+
+	// Scale the normal by and set the new position of the vertex
+	dir = dir * 0.4 + 0.6f;
+	Normal = 0.1 * dir * transpose(inverse(mat3(model))) * aPos;
+	Direction = CentreCoords + Normal;
+	gl_Position = projection * view * vec4(Direction, 1.0);
 }

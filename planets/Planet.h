@@ -6,21 +6,20 @@
 class Planet
 {
 public:
-	Planet(float in_distance, float in_speed, glm::vec3 in_scale, glm::vec3 in_color, float in_rotation_speed, float in_angle);
+	Planet(float in_distance, float in_speed, glm::vec3 in_scale, glm::vec3 in_color, float in_rotation_speed, float in_angle, int in_length);
 
 	virtual void render(Shader& shader, float currentFrame, Camera& camera);
 
 	float distance, sun_rotation_speed,  own_rotation_speed, angle, rotation_speed_angle;
 	glm::vec3 scale, color;
 
+	int length;
 	float x, z;
 	glm::vec3 rotate_vec;
-
-	static uint32_t len;
 };
 
 
-Planet::Planet(float in_distance, float in_speed, glm::vec3 in_scale, glm::vec3 in_color, float in_own_rotation_speed, float in_angle) :
+Planet::Planet(float in_distance, float in_speed, glm::vec3 in_scale, glm::vec3 in_color, float in_own_rotation_speed, float in_angle, int in_length) :
 	distance(in_distance),
 	sun_rotation_speed(in_speed),
 	scale(in_scale),
@@ -29,7 +28,8 @@ Planet::Planet(float in_distance, float in_speed, glm::vec3 in_scale, glm::vec3 
 	angle(in_angle),
 	x(0.0f),
 	z(0.0f),
-	rotate_vec(0.0f)
+	rotate_vec(0.0f),
+	length(in_length)
 {
 	// Exclude division by zero or negative speed
 	if (sun_rotation_speed > 0.01)
@@ -62,15 +62,15 @@ inline void Planet::render(Shader& shader, float currentFrame, Camera& camera)
 	shader.set("model", model);
 	shader.set("viewPos", camera.Position);
 
-	glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
+	glDrawArrays(GL_TRIANGLES, 0, 36 * length * length);
 }
 
 
 class Moon : public Planet
 {
 public:
-	Moon(Planet* in_planet, float in_distance, float in_speed, glm::vec3 in_scale, glm::vec3 in_color, float in_own_rotation_speed, float in_angle) :
-		planet(in_planet), Planet(in_distance, in_speed, in_scale, in_color, in_own_rotation_speed, in_angle) {};
+	Moon(Planet* in_planet, float in_distance, float in_speed, glm::vec3 in_scale, glm::vec3 in_color, float in_own_rotation_speed, float in_angle, int length) :
+		planet(in_planet), Planet(in_distance, in_speed, in_scale, in_color, in_own_rotation_speed, in_angle, length) {};
 
 	void render(Shader& shader, float currentFrame, Camera& camera);
 
@@ -96,5 +96,5 @@ inline void Moon::render(Shader& shader, float currentFrame, Camera& camera)
 	shader.set("model", model);
 	shader.set("viewPos", camera.Position);
 
-	glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
+	glDrawArrays(GL_TRIANGLES, 0, 36 * length * length);
 }

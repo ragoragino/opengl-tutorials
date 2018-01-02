@@ -27,7 +27,7 @@ const glm::vec3 meteor_scale = 0.1f * glm::vec3(1.0f);
 
 // COLORS
 const glm::vec3 sun_color = glm::vec3(252.0, 212.0f, 64.0f) / 256.0f;
-const glm::vec3 earth_color = glm::vec3(0.4f, 0.4f, 1.0f);
+const glm::vec3 earth_color = glm::vec3(0.1f, 0.8f, 0.1f);
 const glm::vec3 moon_color = glm::vec3(0.5f, 0.5f, 0.5f);
 const glm::vec3 saturn_color = glm::vec3(1.000f, 0.871f, 0.678f);
 const glm::vec3 saturn_ring_color = glm::vec3(0.804f, 0.522f, 0.247f);

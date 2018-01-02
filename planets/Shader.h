@@ -1,11 +1,14 @@
 #pragma once
 #include "Header.h"
 
+// Source: https://learnopengl.com/
+
 class Shader
 {
 public:
 	// the program ID
 	unsigned int ID;
+	char * name;
 
 	// constructor reads and builds the shader
 	Shader(const char* vertexPath, const char* fragmentPath);
@@ -202,7 +205,7 @@ void Shader::use()
 template <typename T>
 void Shader::set(const std::string &name, T value) const
 {
-	std::cout << "Incorrect array overload - Name: " << name << "\n";
+	std::cout << "Incorrect set overload - Name: " << name << "\n";
 }
 
 template <>
@@ -239,7 +242,7 @@ void Shader::set(const std::string &name, glm::vec3 model) const
 template<typename T>
 void Shader::set(const std::string &name, unsigned int count, T * value) const
 {
-	std::cout << "Incorrect array overload - Name: " << name << "\n";
+	std::cout << "Incorrect set array overload - Name: " << name << "\n";
 }
 
 template<>
@@ -255,13 +258,13 @@ void Shader::set(const std::string &name, unsigned int count, int * value) const
 }
 
 template<>
-void Shader::set(const std::string &name, unsigned int count, glm::vec3 value[]) const
+void Shader::set(const std::string &name, unsigned int count, glm::vec3 * value) const
 {
 	glUniform3fv(glGetUniformLocation(ID, name.c_str()), count, glm::value_ptr(*value));
 }
 
 template<>
-void Shader::set(const std::string &name, unsigned int count, glm::mat4 value[]) const
+void Shader::set(const std::string &name, unsigned int count, glm::mat4 * value) const
 {
 	glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), count, false, glm::value_ptr(*value));
 }

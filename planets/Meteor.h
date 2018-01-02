@@ -47,7 +47,7 @@ float * meteor_f(int n, int offset = 6, float in_ampl = 0.2f, float in_freq = 0.
 	return meteor;
 }
 
-glm::mat4* InitializeMeteorRing(float x_offset = 1.0f, float y_offset = 0.05f, float z_offset = 1.0f)
+glm::mat4 * InitializeMeteorRing(float x_offset = 1.0f, float y_offset = 0.05f, float z_offset = 1.0f)
 {
 	glm::mat4 * meteor_rings = new glm::mat4[N_METEORS];
 	float x, z, random;
@@ -58,9 +58,9 @@ glm::mat4* InitializeMeteorRing(float x_offset = 1.0f, float y_offset = 0.05f, f
 		x = meteor_distance * (float)sin(2.0f * M_PI * random);
 		z = meteor_distance * (float)cos(2.0f * M_PI * random);
 		meteor_rings[i] = glm::translate(glm::mat4(), 
-			glm::vec3(x + x_offset * (float)rand() / (float) RAND_MAX,
-			y_offset * meteor_distance * (float)rand() / (float)RAND_MAX,
-			z + z_offset * (float)rand() / (float)RAND_MAX
+			glm::vec3(x + x_offset * (2.0f * (float)rand() / (float)RAND_MAX - 1.0f),
+			y_offset * meteor_distance * (2.0f * (float)rand() / (float)RAND_MAX - 1.0f),
+			z + z_offset * (2.0f * (float)rand() / (float)RAND_MAX - 1.0f)
 			));
 		meteor_rings[i] = glm::rotate(meteor_rings[i], (float)(rand() % 360), glm::vec3(x, (float)rand() / (float)RAND_MAX, z));
 		meteor_rings[i] = glm::scale(meteor_rings[i], meteor_scale * (0.5f + (float)rand() / (float)RAND_MAX));
