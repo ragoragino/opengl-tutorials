@@ -24,7 +24,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	GLFWwindow* window = glfwCreateWindow(screen_width, screen_height, "LearnOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(screen_width, screen_height, "Solar System", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -272,7 +272,7 @@ int main()
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	float near_plane = 1.0f;
+	float near_plane = 0.1f;
 	float far_plane = 50.0f;
 	glm::mat4 shadowProj = glm::perspective((float)M_PI * 0.5f, (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
 	glm::mat4 shadowTransforms[6];
@@ -298,16 +298,13 @@ int main()
 	sun_shader_bloom.set("projection", projection);
 	float distance = planet[0] * planet[0] + planet[1] * planet[1] + planet[2] * planet[2];
 	distance *= sun_factor * sun_factor;
-	float diameter = (float)(pow(distance, 0.5));
+	float diameter = (float)(sqrt(distance));
 	sun_shader_bloom.set("diameter", diameter);
 
-	std::cout << diameter << std::endl;
-	
 	skybox_shader.use();
 	skybox_shader.set("p", SIZE, p);
 	skybox_shader.set("r", GRID, r);
 	skybox_shader.set("projection", projection);
-	skybox_shader.set("model", glm::mat4(1.0f));
 
 	moon_shader.use();
 	moon_shader.set("planetCol", moon_color);
@@ -370,6 +367,8 @@ int main()
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		glm::mat4 view = camera.GetViewMatrix();
+	
 		/* *********************************************
 		// FILLING SHADOW BUFFER
 		********************************************* */
@@ -405,7 +404,6 @@ int main()
 		glViewport(0, 0, screen_width, screen_height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		glm::mat4 view = camera.GetViewMatrix();
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -484,7 +482,6 @@ int main()
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		
 		// Rendering bloom of Sun
 		sun_shader_bloom.use();
 

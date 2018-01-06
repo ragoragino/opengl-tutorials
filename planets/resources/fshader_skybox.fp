@@ -7,10 +7,9 @@
 # define FREQUENCY 1.0
 # define NUM_LAYERS 5
 
-out vec4 FragColor;
+out vec3 FragColor;
 
 in vec3 VerCoords;
-in vec4 ModelCoords;
 
 uniform int p[SIZE];
 uniform float r[GRID];

@@ -91,12 +91,6 @@
     <None Include="resources\vshader_moon.vp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="resources\fshader_skybox.fp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resources\vshader_skybox.vp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="resources\fshader_saturn.fp">
       <Filter>Resource Files</Filter>
     </None>
@@ -137,6 +131,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resources\vshader_sun_bloom.vp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\fshader_skybox.fp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\vshader_skybox.vp">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

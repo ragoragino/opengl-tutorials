@@ -13,9 +13,8 @@ void main()
 
 	if((distance < 1.5f * diameter) && (distance > diameter))
 	{
-		// manual configuration of 
+		// manual configuration of the shining effect
 		gl_FragColor = vec4(planetCol, 0.1f + 1.0f - distance / (1.2f * diameter));
-		//gl_FragColor = vec4(1.0f);
 	}
 	else
 	{
