@@ -18,7 +18,8 @@ const float meteor_dispos = 2.0f * (float)M_PI / meteor_speed; // angular change
 const glm::vec3 sun_pos = glm::vec3(0.0f, 0.0f, 0.0f); // SUN MUST BE POSITIONED IN THE CENTRE ! -> fragment shader dependency
 
 // SCALES
-const glm::vec3 sun_scale = 4.0f * glm::vec3(1.0f);
+const float sun_factor = 4.0f;
+const glm::vec3 sun_scale = sun_factor * glm::vec3(1.0f);
 const glm::vec3 earth_scale = 1.0f * glm::vec3(1.0f);
 const glm::vec3 moon_scale = 0.2f * glm::vec3(1.0f);
 const glm::vec3 saturn_scale = 2.0f * glm::vec3(1.0f);
@@ -44,4 +45,7 @@ const float saturn_angle = 15.0f;
 // LIGHTS
 const glm::vec3 sunlight_diffuse(0.6f);
 const glm::vec3 sunlight_ambient(0.2f);
+
+// BLOOMS
+const glm::vec3 sun_scale_bloom = sun_factor * glm::vec3(1.0f) * 1.5f;
 

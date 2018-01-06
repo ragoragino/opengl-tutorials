@@ -211,13 +211,13 @@ void Shader::set(const std::string &name, T value) const
 template <>
 void Shader::set(const std::string &name, uint32_t value) const
 {
-	glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+	glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 }
 
 template <>
 void Shader::set(const std::string &name, int32_t value) const
 {
-	glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+	glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 }
 
 template <>

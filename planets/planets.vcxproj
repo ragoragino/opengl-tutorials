@@ -147,6 +147,7 @@
     <None Include="resources\fshader_shadow.fp" />
     <None Include="resources\fshader_skybox.fp" />
     <None Include="resources\fshader_sun.fp" />
+    <None Include="resources\fshader_sun_bloom.fp" />
     <None Include="resources\fshader_sun_perlin.fp" />
     <None Include="resources\gshader_shadow.gp" />
     <None Include="resources\vshader_earth.vp" />
@@ -159,6 +160,7 @@
     <None Include="resources\vshader_shadow.vp" />
     <None Include="resources\vshader_skybox.vp" />
     <None Include="resources\vshader_sun.vp" />
+    <None Include="resources\vshader_sun_bloom.vp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

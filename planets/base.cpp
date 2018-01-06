@@ -51,6 +51,9 @@ int main()
 	Shader sun_shader = Shader("D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\vshader_sun.vp",
 		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_sun.fp");
 
+	Shader sun_shader_bloom = Shader("D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\vshader_sun_bloom.vp",
+		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_sun_bloom.fp");
+
 	Shader moon_shader = Shader("D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\vshader_moon.vp",
 		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_moon.fp");
 
@@ -288,6 +291,18 @@ int main()
 	sun_shader.set("r", GRID, r);
 	sun_shader.set("planetCol", sun_color);
 
+	sun_shader_bloom.use();
+	sun_shader_bloom.set("p", SIZE, p);
+	sun_shader_bloom.set("r", GRID, r);
+	sun_shader_bloom.set("planetCol", sun_color);
+	sun_shader_bloom.set("projection", projection);
+	float distance = planet[0] * planet[0] + planet[1] * planet[1] + planet[2] * planet[2];
+	distance *= sun_factor * sun_factor;
+	float diameter = (float)(pow(distance, 0.5));
+	sun_shader_bloom.set("diameter", diameter);
+
+	std::cout << diameter << std::endl;
+	
 	skybox_shader.use();
 	skybox_shader.set("p", SIZE, p);
 	skybox_shader.set("r", GRID, r);
@@ -427,7 +442,7 @@ int main()
 		sun_shader.set("time", currentFrame);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
-		
+	
 		// MOON RENDERING
 		moon_shader.use();
 		moon_shader.set("CentreCoords", glm::vec3(earth_moon.x, 0.0f, earth_moon.z)); // set coords of the centre of Moon
@@ -469,8 +484,31 @@ int main()
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		
+		// Rendering bloom of Sun
+		sun_shader_bloom.use();
+
+		glm::mat4 model_sun_bloom = glm::scale(glm::mat4(), sun_scale_bloom);
+		model_sun_bloom = glm::rotate(model_sun_bloom, 0.5f * (float)M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+		
+		glm::vec3 z_axis = glm::normalize(camera.Position);
+		glm::vec3 x_axis = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), z_axis));
+		glm::vec3 y_axis = glm::cross(z_axis, x_axis);
+		glm::mat4 model_sun_bloom_ext = glm::mat4(
+			glm::vec4(x_axis, 0.0f), 
+			glm::vec4(y_axis, 0.0f),
+			glm::vec4(z_axis, 0.0f),
+			glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
+		);
+		sun_shader_bloom.set("model", model_sun_bloom);
+		sun_shader_bloom.set("modelext", model_sun_bloom_ext);
+		sun_shader_bloom.set("view", view);
+		sun_shader_bloom.set("time", currentFrame);		
+
+		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);
+		
 		glDisable(GL_BLEND);
-	
+		
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);

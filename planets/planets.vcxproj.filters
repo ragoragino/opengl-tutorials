@@ -133,5 +133,11 @@
     <None Include="resources\vshader_moon_shadow.vp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="resources\fshader_sun_bloom.fp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\vshader_sun_bloom.vp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
