@@ -117,7 +117,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="base.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="glad.c" />
   </ItemGroup>
   <ItemGroup>
