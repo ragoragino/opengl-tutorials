@@ -1,11 +1,6 @@
 #version 330 core
-# define SIZE 512
+# define SIZE 1024
 # define GRID 256
-# define AMPLITUDE_MULT 0.5
-# define FREQUENCY_MULT 2.0
-# define AMPLITUDE 1.0
-# define FREQUENCY 1.0
-# define NUM_LAYERS 5
 # define OFFSET_SIZE 27
 
 out vec4 FragColor;
@@ -56,7 +51,7 @@ float noise(float in_x, float in_y)
 }
  
 // Directional Light
-vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
+vec3 PointLight(vec3 direct, vec3 normal, vec3 obj_col)
 {	
     vec3 norm = normalize(normal);
 	vec3 lightDir = normalize(-direct);
@@ -103,7 +98,7 @@ void main()
 	}
 	
 	vec3 light = vec3(0.0f);
-	light += DirectionalLight(Direction, Normal, planetCol);
+	light += PointLight(Direction, Normal, planetCol);
 
 	gl_FragColor = vec4(light, 1.0f) * ( - clamp(1 - frac_noise, 0.0f, 1.0f) * vec4(1.0f, 0.0f, 0.0f, 1.0f) + vec4(planetCol.x, planetCol.y, planetCol.z, 1.0f));
 }

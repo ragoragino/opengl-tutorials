@@ -60,7 +60,7 @@ void Snapshot::take_snapshot()
 
 	if (digits > max_snapshot_count)
 	{
-		printf("Buffer of snapshost names is full. Increase the in_max_snapshsot_count variable in order to increase the number!");
+		printf("Buffer of snapshot names is full. Increase the in_max_snapshsot_count variable in order to increase the number!");
 	}
 
 	// Write the image with the constructed output name

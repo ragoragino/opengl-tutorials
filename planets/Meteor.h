@@ -6,8 +6,8 @@
 
 const int N_METEORS = 1000; // Must be also defined in meteor fragment shaders !!!
 
-float * meteor_f(int n, int offset = 6, float in_ampl = 0.2f, float in_freq = 0.1f, 
-	float ampl_mult = 0.35f, float freq_mult = 1.5f, int octave = 5, float magnitude = 0.5f)
+float * meteor_f(int n, int offset = 6, float in_ampl = 0.5f, float in_freq = 0.5f, 
+	float ampl_mult = 0.35f, float freq_mult = 0.4f, int octave = 5, float magnitude = 0.5f)
 {
 	float * meteor = sphere(n);
 	
@@ -62,7 +62,7 @@ glm::mat4 * InitializeMeteorRing(float x_offset = 1.0f, float y_offset = 0.05f, 
 			y_offset * meteor_distance * (2.0f * (float)rand() / (float)RAND_MAX - 1.0f),
 			z + z_offset * (2.0f * (float)rand() / (float)RAND_MAX - 1.0f)
 			));
-		meteor_rings[i] = glm::rotate(meteor_rings[i], (float)(rand() % 360), glm::vec3(x, (float)rand() / (float)RAND_MAX, z));
+		meteor_rings[i] = glm::rotate(meteor_rings[i], glm::radians((float)(rand() % 360)), glm::vec3(x, (float)rand() / (float)RAND_MAX, z));
 		meteor_rings[i] = glm::scale(meteor_rings[i], meteor_scale * (0.5f + (float)rand() / (float)RAND_MAX));
 	}
 
@@ -77,7 +77,7 @@ float * InitializeMeteorRingFlucation(int fluctation_length = 5)
 	for (int i = 0; i < N_METEORS; ++i)
 	{
 		// The values need to be continuous!
-		meteor_ring_fluctuation[i] = (float)sin(2 * M_PI * i / (N_METEORS / fluctation_length ) );
+		meteor_ring_fluctuation[i] = (float)sin(2.0f * M_PI * i / ((float)N_METEORS / (float)fluctation_length ) );
 	}
 
 	return meteor_ring_fluctuation;

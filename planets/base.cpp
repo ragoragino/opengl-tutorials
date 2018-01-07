@@ -18,6 +18,7 @@
 
 int main()
 {
+	// Initialize window with GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -35,9 +36,9 @@ int main()
 
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -45,6 +46,7 @@ int main()
 		return -1;
 	}
 
+	// Initialize Shaders
 	Shader earth_shader = Shader("D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\vshader_earth.vp",
 		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_earth.fp");
 
@@ -66,9 +68,6 @@ int main()
 	Shader meteor_shader = Shader("D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\vshader_meteor.vp",
 		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_meteor.fp");
 
-	Shader meteor_poly_shader = Shader("D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\vshader_poly_meteor.vp",
-		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_poly_meteor.fp");
-
 	Shader skybox_shader = Shader("D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\vshader_skybox.vp",
 		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_skybox.fp");
 
@@ -80,8 +79,11 @@ int main()
 		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\fshader_shadow.fp",
 		"D:\\Materials\\Programming\\Projekty\\opengl-tutorial\\planets\\resources\\gshader_shadow.gp");
 
-	const uint32_t len = 100; // grid structure of sphere
-	const uint32_t len_meteor = 10; // grid structureof the meteor
+	// Initialize Planets
+	init_buffers(); // Initialize noise buffers
+
+	const uint32_t len = 100; // grid structure of a sphere
+	const uint32_t len_meteor = 10; // grid structure of a meteor
 	const uint32_t size = 6 * len * len * 18; // number of points in sphere array
 	const uint32_t size_meteor = 6 * len_meteor * len_meteor * 18;
 	float * planet = sphere(len);
@@ -90,12 +92,8 @@ int main()
 
 	// Inefficient to construct and render Sun as a Planet object
 	Planet earth = Planet(earth_distance, earth_speed, earth_scale, earth_color, earth_rotation, 0.0f, len);
-
 	Planet saturn = Planet(saturn_distance, saturn_speed, saturn_scale, saturn_color, saturn_rotation, saturn_angle, len);
-
 	Moon earth_moon = Moon(&earth, moon_distance, moon_speed, moon_scale, moon_color, moon_rotation, 0.0f, len);
-
-	init_buffers(); // Initialize noise buffers
 
 	/* *********************************************
 	// BUFFERS
@@ -112,6 +110,8 @@ int main()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+	glBindVertexArray(0);
+
 	// SATURN RING
 	uint32_t VAO_saturn_ring, VBO_saturn_ring;
 	glGenVertexArrays(1, &VAO_saturn_ring);
@@ -127,6 +127,8 @@ int main()
 	// vertex normals
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
+	glBindVertexArray(0);
 
 	// METEOR
 	uint32_t VAO_meteor, VBO_meteor;
@@ -198,6 +200,8 @@ int main()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
+	glBindVertexArray(0);
+
 	/* *********************************************
 	// UNIFORMS
 	********************************************* */
@@ -205,10 +209,12 @@ int main()
 	uint32_t uniformBlockIndexEarth = glGetUniformBlockIndex(earth_shader.ID, "Matrices");
 	uint32_t uniformBlockIndexSun = glGetUniformBlockIndex(sun_shader.ID, "Matrices");
 	uint32_t uniformBlockIndexMoon = glGetUniformBlockIndex(moon_shader.ID, "Matrices");
+	uint32_t uniformBlockIndexSunBloom = glGetUniformBlockIndex(sun_shader_bloom.ID, "Matrices");
 
 	glUniformBlockBinding(earth_shader.ID, uniformBlockIndexEarth, 0);
 	glUniformBlockBinding(sun_shader.ID, uniformBlockIndexSun, 0);
 	glUniformBlockBinding(moon_shader.ID, uniformBlockIndexMoon, 0);
+	glUniformBlockBinding(sun_shader_bloom.ID, uniformBlockIndexSunBloom, 0);
 
 	uint32_t uboMatrices;
 	glGenBuffers(1, &uboMatrices);
@@ -249,14 +255,14 @@ int main()
 	/* *********************************************
 	// SHADOWS
 	********************************************* */
-	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-	unsigned int shadow_buffer;
+	const uint32_t SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	uint32_t shadow_buffer;
 	glGenFramebuffers(1, &shadow_buffer);
 
-	unsigned int shadow_texture;
+	uint32_t shadow_texture;
 	glGenTextures(1, &shadow_texture);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, shadow_texture);
-	for (unsigned int i = 0; i < 6; ++i)
+	for (uint32_t i = 0; i < 6; ++i)
 	{
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	}
@@ -284,7 +290,7 @@ int main()
 	shadowTransforms[5] = shadowProj * glm::lookAt(sun_pos, sun_pos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
 
 	/* *********************************************
-	// SHADERS
+	// SET SHADERS CONSTANTS
 	********************************************* */
 	sun_shader.use();
 	sun_shader.set("p", SIZE, p);
@@ -295,7 +301,6 @@ int main()
 	sun_shader_bloom.set("p", SIZE, p);
 	sun_shader_bloom.set("r", GRID, r);
 	sun_shader_bloom.set("planetCol", sun_color);
-	sun_shader_bloom.set("projection", projection);
 	float distance = planet[0] * planet[0] + planet[1] * planet[1] + planet[2] * planet[2];
 	distance *= sun_factor * sun_factor;
 	float diameter = (float)(sqrt(distance));
@@ -310,7 +315,7 @@ int main()
 	moon_shader.set("planetCol", moon_color);
 	moon_shader.set("shadow_texture", 0);
 	moon_shader.set("far_plane", far_plane);
-	moon_shader.set("p", SIZE, p); // GRID instead of SIZE -> only 1D Perlin
+	moon_shader.set("p", SIZE, p);
 	moon_shader.set("r", GRID, r);
 	moon_shader.set("sampleOffsetDirections", OFFSET_SIZE, ShadowOffsetDirections);
 
@@ -322,13 +327,13 @@ int main()
 	earth_shader.set("far_plane", far_plane);
 	earth_shader.set("sampleOffsetDirections", OFFSET_SIZE, ShadowOffsetDirections);
 
-	saturn_shader.use(); // TODO 512
-	saturn_shader.set("p", 2 * GRID, p); // GRID instead of SIZE -> only 1D Perlin
+	saturn_shader.use(); 
+	saturn_shader.set("p", SIZE, p);
 	saturn_shader.set("r", GRID, r);
 	saturn_shader.set("planetCol", saturn_color);
 
 	saturn_ring_shader.use();
-	saturn_ring_shader.set("p", GRID, p); // GRID instead of SIZE -> only 1D Perlin
+	saturn_ring_shader.set("p", SIZE, p);
 	saturn_ring_shader.set("r", GRID, r);
 	saturn_ring_shader.set("planetCol", saturn_ring_color);
 	saturn_ring_shader.set("shadow_texture", 0);
@@ -336,7 +341,7 @@ int main()
 	saturn_ring_shader.set("sampleOffsetDirections", OFFSET_SIZE, ShadowOffsetDirections);
 
 	meteor_shader.use();
-	meteor_shader.set("p", GRID, p); // GRID instead of SIZE -> only 1D Perlin
+	meteor_shader.set("p", SIZE, p); 
 	meteor_shader.set("r", GRID, r);
 	meteor_shader.set("planetCol", meteor_color);
 	meteor_shader.set("offset", N_METEORS, meteor_ring_fluctation);
@@ -354,7 +359,8 @@ int main()
 	
 	glEnable(GL_MULTISAMPLE);
 	
-	while (!glfwWindowShouldClose(window)) // render loop
+	// render loop
+	while (!glfwWindowShouldClose(window)) 
 	{
 		processInput(window);
 
@@ -456,7 +462,6 @@ int main()
 
 		// Move the meteors
 		glm::mat4 model_meteor = glm::rotate(glm::mat4(), - meteor_dispos * currentFrame, glm::vec3(0.0f, 1.0f, 0.0f));
-
 		meteor_shader.set("model", model_meteor);
 		meteor_shader.set("viewPos", camera.Position);
 		meteor_counter = (meteor_counter + 1) % N_METEORS;
@@ -482,12 +487,13 @@ int main()
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		// Rendering bloom of Sun
+		// SUN BLOOM RENDERING
 		sun_shader_bloom.use();
 
 		glm::mat4 model_sun_bloom = glm::scale(glm::mat4(), sun_scale_bloom);
 		model_sun_bloom = glm::rotate(model_sun_bloom, 0.5f * (float)M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
 		
+		// Set the bloom so that it is always rotated towards the camera
 		glm::vec3 z_axis = glm::normalize(camera.Position);
 		glm::vec3 x_axis = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), z_axis));
 		glm::vec3 y_axis = glm::cross(z_axis, x_axis);
@@ -499,7 +505,6 @@ int main()
 		);
 		sun_shader_bloom.set("model", model_sun_bloom);
 		sun_shader_bloom.set("modelext", model_sun_bloom_ext);
-		sun_shader_bloom.set("view", view);
 		sun_shader_bloom.set("time", currentFrame);		
 
 		glDrawArrays(GL_TRIANGLES, 0, 36 * len * len);

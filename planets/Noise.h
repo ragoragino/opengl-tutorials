@@ -4,7 +4,8 @@
 
 /*
 Arrays and initializer for noise functions.
-The implementation is also in fragment shaders -> this part is for sanity checks.
+The implementation is also in fragment shaders -> these function were used for sanity checks and 
+in creating the crevices on the Moon and bumps on the meteors.
 */
 
 // Index array
@@ -54,11 +55,24 @@ static float r[GRID]; // Random numbers array: (0.0, 1.0)
 
 void init_buffers()
 {
-	for (int i = 0; i != GRID * 2; ++i)
+	int subscript;
+	int index;
+
+	for (int i = 1; i != 4; ++i)
 	{
-		int index = int(rand() % GRID);
-		p[i + GRID] = p[index];
+		std::vector<int> subscripts{ p, p + GRID };
+		subscript = GRID;
+		for (int j = 0; j != GRID; ++j)
+		{
+			index = int(rand() % subscript);
+
+			p[j + i * GRID] = subscripts[index];
+
+			subscripts.erase(subscripts.begin() + index);
+			--subscript;
+		}
 	}
+	
 
 	for (int i = 0; i != GRID; ++i)
 	{
@@ -66,8 +80,7 @@ void init_buffers()
 	}
 }
 
-// Implementation of the value noise function
-
+// Spline function
 template<typename T>
 T smoothstep(T edge0, T edge1, T x)
 {
@@ -76,6 +89,7 @@ T smoothstep(T edge0, T edge1, T x)
 	return t * t * (3.0f - 2.0f * t);
 }
 
+// Linear interpolation function
 template<typename T>
 T lerp(T a, T b, T t)
 {
@@ -154,7 +168,7 @@ float noise(float in_x, float in_y, float in_z)
 	int ry1 = int((ry0 + 1) % GRID);
 	int rz0 = int((floor_z) % GRID);
 	int rz1 = int((rz0 + 1) % GRID);
-
+	
 	float c000 = r[p[p[p[rx0] + ry0] + rz0]];
 	float c100 = r[p[p[p[rx1] + ry0] + rz0]];
 	float c010 = r[p[p[p[rx0] + ry1] + rz0]];

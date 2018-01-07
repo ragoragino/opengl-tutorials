@@ -1,11 +1,6 @@
 #version 330 core
 # define SIZE 1024
 # define GRID 256
-# define AMPLITUDE_MULT 0.5
-# define FREQUENCY_MULT 2.0
-# define AMPLITUDE 1.0
-# define FREQUENCY 1.0
-# define NUM_LAYERS 5
 
 out vec4 FragColor;
 
@@ -16,7 +11,7 @@ uniform int p[SIZE];
 uniform float r[GRID];
 uniform float time;
 
-float noise4D(float in_x, float in_y, float in_z, float in_w)
+float noise(float in_x, float in_y, float in_z, float in_w)
 {
 	float x = in_x - int(in_x);
 	float y = in_y - int(in_y);
@@ -94,7 +89,7 @@ void main()
 	vec3 frac_vec = VerCoords * freq;
 	for(int i = 0; i != 5; ++i)
 	{
-		frac_noise += noise4D(frac_vec.x, frac_vec.y, frac_vec.z, time / 300.0f) * ampl;
+		frac_noise += noise(frac_vec.x, frac_vec.y, frac_vec.z, time / 300.0f) * ampl;
 		ampl *= ampl_mult;
 		freq *= freq_mult;
 		frac_vec *= freq;
@@ -102,6 +97,6 @@ void main()
 
 	frac_noise = frac_noise * 0.2f + 0.6f;
 
-	gl_FragColor = vec4(frac_noise * vec3(0.9f, 0.7f, 0.2f), 1.0); 
+	gl_FragColor = vec4(frac_noise * planetCol, 1.0); 
 }
 

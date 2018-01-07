@@ -1,4 +1,5 @@
 #version 330 core
+# define SIZE 1024
 # define GRID 256
 # define AMPLITUDE_MULT 0.5
 # define FREQUENCY_MULT 2.0
@@ -19,7 +20,7 @@ layout (std140) uniform DirLight
 
 uniform vec3 planetCol;
 uniform vec3 viewPos;
-uniform int p[GRID];
+uniform int p[SIZE];
 uniform float r[GRID];
 
 float noise(float in_x)
@@ -41,8 +42,8 @@ float noise(float in_x)
 	return mix(c000, c100, sx);
 }
 
-// Directional Light
-vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
+// Point Light
+vec3 PointLight(vec3 direct, vec3 normal, vec3 obj_col)
 {	
     vec3 norm = normalize(normal);
 	vec3 lightDir = normalize(-direct);
@@ -60,7 +61,7 @@ vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
 void main()
 {
 	vec3 light = vec3(0.0f);
-	light += DirectionalLight(Direction, Normal, planetCol);
+	light += PointLight(Direction, Normal, planetCol);
 	gl_FragColor = 1.1f * vec4(light * planetCol, 1.0f); 
 }
 

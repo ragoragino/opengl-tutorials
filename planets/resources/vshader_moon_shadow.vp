@@ -1,5 +1,5 @@
 #version 330 core
-#define SIZE 768
+#define SIZE 1024
 #define GRID 256
 layout (location = 0) in vec3 aPos;
 

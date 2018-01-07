@@ -1,5 +1,5 @@
 #version 330 core
-# define SIZE 512
+# define SIZE 1024
 # define GRID 256
 # define OFFSET_SIZE 27
 
@@ -21,7 +21,7 @@ uniform vec3 sampleOffsetDirections[OFFSET_SIZE];
 
 
 // Point Light
-vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
+vec3 PointLight(vec3 direct, vec3 normal, vec3 obj_col)
 {	
     vec3 norm = normalize(normal);
 	vec3 lightDir = normalize(-direct);
@@ -54,7 +54,7 @@ vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
 void main()
 {   
 	vec3 light = vec3(0.0f);
-	light += DirectionalLight(Direction, Normal, planetCol);
+	light += PointLight(Direction, Normal, planetCol);
 
 	gl_FragColor = vec4(light, 1.0f);
 }

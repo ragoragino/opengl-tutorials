@@ -1,5 +1,5 @@
 #version 330 core
-# define SIZE 768
+# define SIZE 1024
 # define GRID 256
 # define OFFSET_SIZE 27
 
@@ -66,9 +66,8 @@ float noise(float in_x, float in_y, float in_z)
 	return mix(ny0, ny1, sz);
 }
 
- 
-// Point Light
-vec3 DirectionalLight(vec3 direct, vec3 normal, vec3 obj_col)
+ // Point Light
+vec3 PointLight(vec3 direct, vec3 normal, vec3 obj_col)
 {	
     vec3 norm = normalize(normal);
 	vec3 lightDir = normalize(-Direction);
@@ -136,7 +135,7 @@ void main()
 	// Add white clouds to the atmosphere
 	EarthColor = mix(EarthColor, vec3(1.0), clamp(clouds, 0.0, 1.0));
 
-	light += DirectionalLight(Direction, Normal, EarthColor);
+	light += PointLight(Direction, Normal, EarthColor);
 
 	gl_FragColor = vec4(light, 1.0);
 }

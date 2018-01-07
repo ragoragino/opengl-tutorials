@@ -38,9 +38,6 @@
     <ClInclude Include="Noise.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Perlin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Solar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -82,9 +79,6 @@
     <None Include="resources\vshader_sun.vp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="resources\fshader_sun_perlin.fp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="resources\fshader_moon.fp">
       <Filter>Resource Files</Filter>
     </None>
@@ -107,12 +101,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resources\vshader_meteor.vp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resources\fshader_poly_meteor.fp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resources\vshader_poly_meteor.vp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resources\fshader_shadow.fp">

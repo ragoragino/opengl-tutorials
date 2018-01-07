@@ -14,10 +14,10 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-// Define screen parameters and initial screen position
+// Screen parameters and initial screen position
 uint32_t screen_width = 1200, screen_height = 800;
-uint32_t screen_pos_x = 500, screen_pos_y = 200;
+uint32_t screen_pos_x = 200, screen_pos_y = 200;
 
-// Define a Snapshot class instance for taking snapshosts
+// Snapshot class instance for taking snapshots
 Snapshot snapshot(screen_width, screen_height); 
 
