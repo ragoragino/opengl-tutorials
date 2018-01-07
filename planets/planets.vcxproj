@@ -117,26 +117,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="glad.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Callbacks.h" />
-    <ClInclude Include="Globals.h" />
-    <ClInclude Include="Meteor.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="Planet.h" />
-    <ClInclude Include="Shadow.h" />
-    <ClInclude Include="Snapshot.h" />
-    <ClInclude Include="Square.h" />
-    <ClInclude Include="Header.h" />
-    <ClInclude Include="Noise.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="Skybox.h" />
-    <ClInclude Include="Solar.h" />
-    <ClInclude Include="sphere.h" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="resources\fshader_earth.fp" />
     <None Include="resources\fshader_meteor.fp" />
     <None Include="resources\fshader_moon.fp" />
@@ -157,6 +137,27 @@
     <None Include="resources\vshader_skybox.vp" />
     <None Include="resources\vshader_sun.vp" />
     <None Include="resources\vshader_sun_bloom.vp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Callbacks.h" />
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\Globals.h" />
+    <ClInclude Include="src\Header.h" />
+    <ClInclude Include="src\Meteor.h" />
+    <ClInclude Include="src\Noise.h" />
+    <ClInclude Include="src\Planet.h" />
+    <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\Shadow.h" />
+    <ClInclude Include="src\Skybox.h" />
+    <ClInclude Include="src\Snapshot.h" />
+    <ClInclude Include="src\Solar.h" />
+    <ClInclude Include="src\sphere.h" />
+    <ClInclude Include="src\Square.h" />
+    <ClInclude Include="src\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
